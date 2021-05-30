@@ -38,13 +38,17 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
-from mosa.dbinterface import DBInterface
-from mosa import dev
 import os
 import subprocess
 import platform
 import shutil
 import webbrowser
+
+try:
+    from mosa.dbinterface import DBInterface
+    from mosa import dev
+except ModuleNotFoundError:
+    pass
 
 
 # Package list to install and keep to date from conda-forge
