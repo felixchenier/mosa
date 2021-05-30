@@ -26,8 +26,9 @@ shared, it is developed for our own private use.
 If you are looking for other code by our lab, you may be happy with these
 public packages:
 
-    - Kinetics Toolkit (https://github.com/felixchenier/kineticstoolkit)
-    - Limited Interaction (https://github.com/felixchenier/limitedinteraction)
+- Kinetics Toolkit (https://github.com/felixchenier/kineticstoolkit)
+
+- Limited Interaction (https://github.com/felixchenier/limitedinteraction)
 
 """
 
@@ -38,10 +39,12 @@ __license__ = "Apache 2.0"
 
 
 from mosa.dbinterface import DBInterface
+from mosa import dev
 import os
 import subprocess
 import platform
 import shutil
+import webbrowser
 
 
 # Operating system
@@ -111,3 +114,11 @@ def terminal(folder_name: str = '') -> None:
     else:
         raise NotImplementedError('This function is only implemented on'
                                   'Windows and macOS.')
+
+
+def update() -> None:
+    """Update mosa from github using pip."""
+    subprocess.call(['pip',
+                     'install',
+                     '--upgrade',
+                     'git+https://github.com/felixchenier/mosa'])

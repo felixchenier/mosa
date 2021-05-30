@@ -5,6 +5,7 @@ setup.py
 mosa/VERSION
 mosa/__init__.py
 mosa/dbinterface.py
+mosa/dev.py
 mosa/tools.py
 mosa.egg-info/PKG-INFO
 mosa.egg-info/SOURCES.txt

@@ -30,7 +30,7 @@ import os
 from io import StringIO
 import pandas as pd
 import warnings
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Union
 
 
 class DBInterface():

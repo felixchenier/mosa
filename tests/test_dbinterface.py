@@ -5,14 +5,14 @@
 #
 # This file is not for redistribution.
 """
-Unit tests for ktk.DBInterface class.
+Unit tests for mosa.DBInterface class.
 
 NOTE ON TEST DATABASE AND DUMMY USER.
 
-ktkDBInterfaceTest and ktkDBInterfaceTutorial run on a local database
-that has the same format as the one on biomec.uqam.ca. However, for the
-tests and tutorials to pass, a special user (dummyUser) must exist and
-have rights on a specially crafter project (dummyProject).
+These tests run on a local database that has the same format as the one on
+biomec.uqam.ca. However, for the tests and tutorials to pass, a special user
+(dummyUser) must exist and have rights on a specially crafter project
+(dummyProject).
 
 To add this user, enter these SQL commands in mysql:
 
@@ -25,7 +25,7 @@ INSERT INTO ProjectsUsers (ProjectID, UserID) VALUES (@ProjectID, @UserID);
 IMPORTANT
 ---------
 For security reasons, the dummyUser must not exist on the real database
-%iomec.uqam.ca. To remove this user, run these SQL commands in mysql:
+biomec.uqam.ca. To remove this user, run these SQL commands in mysql:
 
 SELECT ProjectID FROM Projects WHERE ProjectLabel = "dummyProject" INTO @ProjectID;
 SELECT UserID FROM Users WHERE username = "dummyUser" INTO @UserID;
@@ -35,7 +35,7 @@ DELETE FROM Users WHERE UserID = @UserID;
 
 """
 
-import kineticstoolkit as ktk
+import mosa
 import os
 import shutil
 import warnings
@@ -46,12 +46,16 @@ def test_connect():
     project_label = 'dummyProject'
     username = 'dummyUser'
     password = 'dummyPassword'
-    root_folder = (ktk.config.root_folder +
-                   '/data/dbinterface/FC_XX18A')
+    root_folder = (mosa._root_folder + '/data/dbinterface/FC_XX18A')
     url = 'http://localhost/biomec'
 
-    project = ktk.DBInterface(project_label, user=username, password=password,
-                              root_folder=root_folder, url=url)
+    project = mosa.DBInterface(
+        project_label,
+        user=username,
+        password=password,
+        root_folder=root_folder,
+        url=url
+    )
 
     # Navigating in the project
     project
@@ -72,12 +76,16 @@ def test_load_save():
     project_label = 'dummyProject'
     username = 'dummyUser'
     password = 'dummyPassword'
-    root_folder = (ktk.config.root_folder +
-                   '/data/dbinterface/FC_XX18A')
+    root_folder = (mosa._root_folder + '/data/dbinterface/FC_XX18A')
     url = 'http://localhost/biomec'
 
-    project = ktk.DBInterface(project_label, user=username, password=password,
-                              root_folder=root_folder, url=url)
+    project = mosa.DBInterface(
+        project_label,
+        user=username,
+        password=password,
+        root_folder=root_folder,
+        url=url
+    )
 
     # For example, let's say we just synchronized the kinematics for Run1 of
     # participant 1
@@ -102,12 +110,16 @@ def test_batch_fix_file_type():
     project_label = 'dummyProject'
     username = 'dummyUser'
     password = 'dummyPassword'
-    root_folder = (ktk.config.root_folder +
-                   '/data/dbinterface/FC_XX18A')
+    root_folder = (mosa._root_folder + '/data/dbinterface/FC_XX18A')
     url = 'http://localhost/biomec'
 
-    project = ktk.DBInterface(project_label, user=username, password=password,
-                              root_folder=root_folder, url=url)
+    project = mosa.DBInterface(
+        project_label,
+        user=username,
+        password=password,
+        root_folder=root_folder,
+        url=url
+    )
 
     file_list = []
     for trial in ['Walk1', 'Walk2', 'Run1', 'Run2']:
@@ -152,12 +164,16 @@ def test_tag_files():
     project_label = 'dummyProject'
     username = 'dummyUser'
     password = 'dummyPassword'
-    root_folder = (ktk.config.root_folder +
-                   '/data/dbinterface/FC_XX18A')
+    root_folder = (mosa._root_folder + '/data/dbinterface/FC_XX18A')
     url = 'http://localhost/biomec'
 
-    project = ktk.DBInterface(project_label, user=username, password=password,
-                              root_folder=root_folder, url=url)
+    project = mosa.DBInterface(
+        project_label,
+        user=username,
+        password=password,
+        root_folder=root_folder,
+        url=url
+    )
 
     project.tag_files(include_trial_name=True, dry_run=False)
     assert ('Run1' in
