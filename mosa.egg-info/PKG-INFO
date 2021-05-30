@@ -1,0 +1,35 @@
+Metadata-Version: 2.1
+Name: mosa
+Version: 0.1
+Summary: Private module for the Mobility and Adaptive Sports Research Lab.
+Home-page: https://github.com/felixchenier/mosa
+Author: Félix Chénier
+Author-email: chenier.felix@uqam.ca
+License: Apache
+Project-URL: Source, https://github.com/felixchenier/mosa/
+Project-URL: Tracker, https://github.com/felixchenier/mosa/issues
+Description: Laboratoire de recherche en mobilité et sport adapté
+        ====================================================
+        
+        This module provides functions and classes for the Mobility and Adaptive
+        Sports Research Lab in Montreal. While this code is open and is free to be
+        shared, it is developed for our own private use.
+        
+        If you are looking for other code by our lab, you may be happy with these
+        public packages:
+        
+            - Kinetics Toolkit (https://github.com/felixchenier/kineticstoolkit)
+            - Limited Interaction (https://github.com/felixchenier/limitedinteraction)
+        
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Natural Language :: English
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
