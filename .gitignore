@@ -1,1 +1,4 @@
 mosa/__pycache__
+dev/htmlcov
+dev/.coverage
+

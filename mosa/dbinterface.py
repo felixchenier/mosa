@@ -24,6 +24,7 @@ __license__ = "Apache 2.0"
 
 
 import kineticstoolkit as ktk
+import limitedinteraction as li
 
 import requests
 import os
@@ -90,17 +91,17 @@ class DBInterface():
 
         # Get username and password if not supplied
         if user == '':
-            self.user, self._password = gui.get_credentials()
+            self.user, self._password = ktk.gui.get_credentials()
         else:
             self.user = user
             self._password = password
 
         # Assign root folder
         if root_folder == '':
-            gui.message('Please select the folder that contains the '
+            li.message('Please select the folder that contains the '
                         'project data.')
-            self.root_folder = gui.get_folder()
-            gui.message('')
+            self.root_folder = li.get_folder()
+            li.message('')
         else:
             self.root_folder = root_folder
 
