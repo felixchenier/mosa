@@ -29,8 +29,7 @@ setuptools.setup(
         'Source': 'https://github.com/felixchenier/mosa/',
         'Tracker': 'https://github.com/felixchenier/mosa/issues',
     },
-    install_requires=['kineticstoolkit',
-                      'requests'],
+    install_requires=[],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',

@@ -47,6 +47,29 @@ import shutil
 import webbrowser
 
 
+# Package list to install and keep to date from conda-forge
+packages = [
+    'python=3.8',
+    'kineticstoolkit',
+    'seaborn',
+    'statsmodels',
+    'ezc3d',
+    'git',
+    'pytest',
+    'mypy',
+    'coverage',
+    'jupyterlab',
+    'spyder',
+    'sphinx',
+    'sphinx-material',
+    'recommonmark',
+    'sphinx-autodoc-typehints',
+    'autodocsumm',
+    'nbsphinx',
+    'twine',
+]
+
+
 # Operating system
 _is_pc = True if platform.system() == 'Windows' else False
 _is_mac = True if platform.system() == 'Darwin' else False
@@ -116,9 +139,42 @@ def terminal(folder_name: str = '') -> None:
                                   'Windows and macOS.')
 
 
-def update() -> None:
+def _update_mosa() -> None:
     """Update mosa from github using pip."""
     subprocess.call(['pip',
                      'install',
                      '--upgrade',
                      'git+https://github.com/felixchenier/mosa'])
+
+
+def install_lab() -> None:
+    """Install lab's packages."""
+    print("*******************************")
+    print("UPDATING MOSA...")
+    _update_mosa()
+    print("*******************************")
+    print("INSTALLING PACKAGES...")
+    subprocess.call(['conda',
+                     'install',
+                     '-c',
+                     'conda-forge',
+                     *packages])
+
+
+def update_lab() -> None:
+    """Update lab's packages."""
+    print("*******************************")
+    print("UPDATING MOSA...")
+    _update_mosa()
+    print("*******************************")
+    print("UPDATING PACKAGES...")
+    subprocess.call(['conda',
+                     'upgrade',
+                     '-c',
+                     'conda-forge',
+                     *packages])
+
+
+if __name__ == "__main__":
+    if input("Install lab's packages? [y/n]: ").lower() == 'y':
+        install_lab()
