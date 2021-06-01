@@ -2,3 +2,5 @@ mosa/__pycache__
 dev/htmlcov
 dev/.coverage
 
+.coverage
+tests/htmlcov

@@ -52,8 +52,11 @@ except ModuleNotFoundError:
 
 
 # Package list to install and keep to date from conda-forge
-packages = [
+install_packages = [
     'python=3.8',
+]
+
+packages = [
     'kineticstoolkit',
     'seaborn',
     'statsmodels',
@@ -162,7 +165,7 @@ def install_lab() -> None:
                      'install',
                      '-c',
                      'conda-forge',
-                     *packages])
+                     *install_packages, *packages])
 
 
 def update_lab() -> None:
@@ -170,6 +173,13 @@ def update_lab() -> None:
     print("*******************************")
     print("UPDATING MOSA...")
     _update_mosa()
+    print("*******************************")
+    print("INSTALLING NEW PACKAGES...")
+    subprocess.call(['conda',
+                     'install',
+                     '-c',
+                     'conda-forge',
+                     *install_packages, *packages])
     print("*******************************")
     print("UPDATING PACKAGES...")
     subprocess.call(['conda',
