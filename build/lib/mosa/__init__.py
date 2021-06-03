@@ -51,13 +51,15 @@ except ModuleNotFoundError:
     pass
 
 
-# Package list to install and keep to date from conda-forge
+# Packages with a specific version number
 install_packages = [
     'python=3.8',
     'spyder=4',
 ]
 
+# Packages to install and keep updated
 packages = [
+    'sphinx_rtd_theme',
     'kineticstoolkit',
     'seaborn',
     'statsmodels',
@@ -74,6 +76,7 @@ packages = [
     'autodocsumm',
     'nbsphinx',
     'twine',
+    'inflection',
 ]
 
 
