@@ -54,6 +54,7 @@ except ModuleNotFoundError:
 # Package list to install and keep to date from conda-forge
 install_packages = [
     'python=3.8',
+    'spyder=4',
 ]
 
 packages = [
@@ -66,7 +67,6 @@ packages = [
     'mypy',
     'coverage',
     'jupyterlab',
-    'spyder',
     'sphinx',
     'sphinx-material',
     'recommonmark',
@@ -154,7 +154,7 @@ def _update_mosa() -> None:
                      'git+https://github.com/felixchenier/mosa'])
 
 
-def install_lab() -> None:
+def install() -> None:
     """Install lab's packages."""
     print("*******************************")
     print("UPDATING MOSA...")
@@ -168,7 +168,7 @@ def install_lab() -> None:
                      *install_packages, *packages])
 
 
-def update_lab() -> None:
+def update() -> None:
     """Update lab's packages."""
     print("*******************************")
     print("UPDATING MOSA...")
@@ -188,7 +188,3 @@ def update_lab() -> None:
                      'conda-forge',
                      *packages])
 
-
-if __name__ == "__main__":
-    if input("Install lab's packages? [y/n]: ").lower() == 'y':
-        install_lab()
