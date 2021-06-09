@@ -18,5 +18,6 @@ Utilisation du package MOSA pour configurer un ordinateur du laboratoire :
 1. Installer [miniconda](https://docs.conda.io/en/latest/miniconda.html)
 2. Dans un terminal (Terminal sur macOS, Anaconda bash sur Windows) :
     - conda create -n mosa python=3.8
+    - conda activate mosa
     - pip install git+https://github.com/felixchenier/mosa
     - python -c "import mosa; mosa.install()"
