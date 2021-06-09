@@ -52,7 +52,7 @@ except ModuleNotFoundError:
 
 
 # Packages with a specific version number
-install_packages = [
+specific_versions = [
     'python=3.8',
     'spyder=4',
 ]
@@ -60,7 +60,7 @@ install_packages = [
 # Packages to install and keep updated
 packages = [
     'sphinx_rtd_theme',
-    'kineticstoolkit',
+    'matplotlib',
     'seaborn',
     'statsmodels',
     'ezc3d',
@@ -168,7 +168,7 @@ def install() -> None:
                      'install',
                      '-c',
                      'conda-forge',
-                     *install_packages, *packages])
+                     *specific_versions, *packages])
 
 
 def update() -> None:
@@ -182,12 +182,12 @@ def update() -> None:
                      'install',
                      '-c',
                      'conda-forge',
-                     *install_packages, *packages])
+                     *specific_versions, *packages])
     print("*******************************")
     print("UPDATING PACKAGES...")
     subprocess.call(['conda',
                      'upgrade',
+                     '--all',
                      '-c',
                      'conda-forge',
-                     *packages])
-
+                     *specific_versions])

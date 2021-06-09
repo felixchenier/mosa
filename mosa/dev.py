@@ -3,16 +3,18 @@
 import subprocess
 import mosa
 import os
-import shutil
+
+
+major_version = 0
 
 
 def build() -> None:
     """Build the mosa module in a pip-accessible format."""
     # Bump version number
     with open(mosa._root_folder + '/mosa/VERSION', 'r') as fh:
-        version = fh.read()
+        minor_version = fh.read().split('.', maxsplit=1)[1]
     with open(mosa._root_folder + '/mosa/VERSION', 'w') as fh:
-        fh.write(f'{float(version) + 0.1:.2}')
+        fh.write(f'{major_version}.{int(minor_version) + 1}')
 
     os.chdir(mosa._root_folder)
 
