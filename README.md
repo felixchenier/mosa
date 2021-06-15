@@ -13,11 +13,22 @@ public packages:
 
 ----------------------------------------
 
-Utilisation du package MOSA pour configurer un ordinateur du laboratoire :
+Installing MOSA to configure lab's and students' computers:
 
-1. Installer [miniconda](https://docs.conda.io/en/latest/miniconda.html)
-2. Dans un terminal (Terminal sur macOS, Anaconda bash sur Windows) :
+1. Install [miniconda](https://docs.conda.io/en/latest/miniconda.html)
+2. In a terminal - Terminal on macOS, Anaconda shell (bash) on Windows:
     - conda create -n mosa python=3.8
     - conda activate mosa
     - pip install git+https://github.com/felixchenier/mosa
     - python -c "import mosa; mosa.install()"
+3. Spyder can then be started using its icon on Windows, or on macOS:
+    - conda activate mosa
+    - spyder
+
+To keep the lab's packages up to date, from a python interpreter:
+    - import mosa
+    - mosa.update()
+
+----------------------------------------
+
+Reference to the lab's [coding style](coding_style/coding_style.md)
