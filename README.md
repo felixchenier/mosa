@@ -1,7 +1,7 @@
 Laboratoire de recherche en mobilité et sport adapté
 ====================================================
 
-This module provides functions and classes for the Mobility and Adaptive
+This module and resources are dedicated for the Mobility and Adaptive
 Sports Research Lab in Montreal. While this code is open and is free to be
 shared, it is developed for our own private use.
 
@@ -11,24 +11,34 @@ public packages:
 - [Kinetics Toolkit](https://github.com/felixchenier/kineticstoolkit)
 - [Limited Interaction](https://github.com/felixchenier/limitedinteraction)
 
-----------------------------------------
 
-Installing MOSA to configure lab's and students' computers:
+Installation de Python et des packages utilisés par le laboratoire
+------------------------------------------------------------------
 
-1. Install [miniconda](https://docs.conda.io/en/latest/miniconda.html)
-2. In a terminal - Terminal on macOS, Anaconda shell (bash) on Windows:
+1. Installer [miniconda](https://docs.conda.io/en/latest/miniconda.html)
+
+2. Dans un terminal (Terminal sur macOS, Anaconda shell (bash) sur Windows):
+
     - conda create -n mosa python=3.8
     - conda activate mosa
     - pip install git+https://github.com/felixchenier/mosa
     - python -c "import mosa; mosa.install()"
-3. Spyder can then be started using its icon on Windows, or on macOS:
+
+3. Sur Windows, on peut alors démarrer Spyder à partir de son icône. Sur macOS, dans un terminal:
+
     - conda activate mosa
     - spyder
 
-To keep the lab's packages up to date, from a python interpreter:
+4. Pour faire les mises à jour, à partir d'un terminal (e.g., console Spyder):
+
     - import mosa
     - mosa.update()
+    - Il peut être nécessaire de redémarrer Spyder après une mise à jour.
 
+
+Procédures de laboratoire
 ----------------------------------------
 
-Reference to the lab's [coding style](coding_style/coding_style.md)
+- [Coding Style](procedures/coding_style.md)
+- [Communication et suivi de tâches avec Trello](procedures/trello.md)
+
