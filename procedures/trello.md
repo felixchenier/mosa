@@ -33,7 +33,7 @@ Trello est un outil à la fois très simple et très versatile. Il peut être ut
 
 Comme pratiquement toutes les communications écrites passent par Trello, il est important de bien réaliser ces deux étapes pour ne rien manquer:
 
-1. Se logger sur Trello. Vous pouvez vous logger directement avec votre adresse email de l'UQAM sans avoir à créer un nouveau compte.
+1. Se logger sur [Trello](https://trello.com). Vous pouvez vous logger directement avec votre adresse email de l'UQAM sans avoir à créer un nouveau compte.
 
 2. S'assurer de recevoir des courriels de notification de Trello, pour être avertis lorsque vous êtes taggé(e)s ou assigné(e)s. Choisir "Periodically" ou "Instantly" selon votre préférence :
 
