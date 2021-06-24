@@ -89,7 +89,7 @@ Ce type de carte est utilisé pour partager visiblement et indéfiniment une inf
 
 - Sur le board du laboratoire:
     - l'adresse Zoom pour les rencontres de laboratoire en virtuel
-    - les liens vers les procédures telle que ce fichier
+    - les liens vers les procédures (e.g., le fichier que vous lisez actuellement)
     - etc.
 - Sur un board de projet:
     - une datasheet
