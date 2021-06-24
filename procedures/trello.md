@@ -1,6 +1,6 @@
 ![logo](../logo/logo_standard_light_small.png)
 
-# Communication via Trello
+# Communication et suivi de tâches avec Trello
 
 L'outil de communication principal au laboratoire est [Trello](https://trello.com).
 
@@ -163,6 +163,6 @@ Il est possible de consulter, d'un seul regard, toutes les tâches qui vous sont
 
 #### Workflow de suivi de tâche
 
-Voici un exemple de workflow à adopter pour s'assurer qu'une tâche ne parte pas dans l'oubli et que son suivi soit optimal.
+Voici un exemple de workflow générique à adopter pour s'assurer qu'une tâche ne parte pas dans l'oubli et que son suivi soit optimal. Il ne comporte pas tous les cas de figure, mais est pas mal complet.
 
 ![Workflow](tags/workflow.png)
