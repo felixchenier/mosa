@@ -1,3 +1,5 @@
+![logo](../logo/logo_standard_light_small.png)
+
 Laboratoire de recherche en mobilité et sport adapté
 ====================================================
 
