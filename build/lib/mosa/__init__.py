@@ -59,11 +59,11 @@ specific_versions = [
 
 # Packages to install and keep updated
 packages = [
+    'ezc3d',
+    'kineticstoolkit',
     'sphinx_rtd_theme',
-    'matplotlib',
     'seaborn',
     'statsmodels',
-    'ezc3d',
     'git',
     'pytest',
     'mypy',
@@ -77,6 +77,7 @@ packages = [
     'nbsphinx',
     'twine',
     'inflection',
+    'ffmpeg',
 ]
 
 

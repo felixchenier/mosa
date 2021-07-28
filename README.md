@@ -21,26 +21,19 @@ Installation de Python et des packages utilisés par le laboratoire
 
 2. Dans un terminal (Terminal sur macOS, Anaconda shell (bash) sur Windows):
 
-    - conda create -n mosa python=3.8
-    - conda activate mosa
-    - pip install git+https://github.com/felixchenier/mosa
-    - python -c "import mosa; mosa.install()"
+    - `conda create -n mosa python=3.8`
+    - `conda activate mosa`
+    - `pip install git+https://github.com/felixchenier/mosa`
+    - `python -c "import mosa; mosa.install()"`
+    - Fermer le terminal.
 
 3. Sur Windows, on peut alors démarrer Spyder à partir de son icône. Sur macOS, dans un terminal:
 
-    - conda activate mosa
-    - spyder
+    - `conda activate mosa`
+    - `spyder`
 
 4. Pour faire les mises à jour, à partir d'un terminal (e.g., console Spyder):
 
-    - import mosa
-    - mosa.update()
+    - `import mosa`
+    - `mosa.update()`
     - Il peut être nécessaire de redémarrer Spyder après une mise à jour.
-
-
-Procédures de laboratoire
-----------------------------------------
-
-- [Coding Style](procedures/coding_style.md)
-- [Communication et suivi de tâches avec Trello](procedures/trello.md)
-
