@@ -54,11 +54,11 @@ except ModuleNotFoundError:
 # Packages with a specific version number
 specific_versions = [
     'python=3.8',
-    'spyder=4',
 ]
 
 # Packages to install and keep updated
 packages = [
+    'spyder',
     'ezc3d',
     'kineticstoolkit',
     'sphinx_rtd_theme',
