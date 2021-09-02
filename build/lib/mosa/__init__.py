@@ -54,6 +54,7 @@ except ModuleNotFoundError:
 # Packages with a specific version number
 specific_versions = [
     'python=3.8',
+    'tk=8.6.10',  # 8.6.11 has a title bar bug on macOS
 ]
 
 # Packages to install and keep updated
