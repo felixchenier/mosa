@@ -192,7 +192,7 @@ def install() -> None:
     _update_mosa()
     print("*******************************")
     print("INSTALLING PACKAGES...")
-    s = 'conda install -c conda-forge '
+    s = 'conda install -y -c conda-forge '
     for _ in specific_versions:
         s += _
         s += ' '
@@ -211,7 +211,7 @@ def update() -> None:
     print("*******************************")
     print("INSTALLING NEW PACKAGES...")
 
-    s = 'conda install -c conda-forge '
+    s = 'conda install -y -c conda-forge '
     for _ in specific_versions:
         s += _
         s += ' '
@@ -224,7 +224,7 @@ def update() -> None:
     print("*******************************")
     print("UPDATING PACKAGES...")
 
-    s = 'conda upgrade --all -c conda-forge '
+    s = 'conda upgrade --all -y -c conda-forge '
     for _ in specific_versions:
         s += _
         s += ' '
