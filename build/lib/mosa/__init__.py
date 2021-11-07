@@ -179,10 +179,10 @@ def terminal(folder_name: str = '') -> None:
 
 def _update_mosa() -> None:
     """Update mosa from github using pip."""
-    subprocess.call(['pip',
-                     'install',
-                     '--upgrade',
-                     'git+https://github.com/felixchenier/mosa'])
+    subprocess.call(
+        'pip install --upgrade git+https://github.com/felixchenier/mosa',
+        shell=True
+    )
 
 
 def install() -> None:
@@ -192,11 +192,15 @@ def install() -> None:
     _update_mosa()
     print("*******************************")
     print("INSTALLING PACKAGES...")
-    subprocess.call(['conda',
-                     'install',
-                     '-c',
-                     'conda-forge',
-                     *specific_versions, *packages])
+    s = 'conda install -c conda-forge '
+    for _ in specific_versions:
+        s += _
+        s += ' '
+    for _ in packages:
+        s += _
+        s += ' '
+
+    subprocess.call(s, shell=True)
 
 
 def update() -> None:
@@ -206,16 +210,23 @@ def update() -> None:
     _update_mosa()
     print("*******************************")
     print("INSTALLING NEW PACKAGES...")
-    subprocess.call(['conda',
-                     'install',
-                     '-c',
-                     'conda-forge',
-                     *specific_versions, *packages])
+
+    s = 'conda install -c conda-forge '
+    for _ in specific_versions:
+        s += _
+        s += ' '
+    for _ in packages:
+        s += _
+        s += ' '
+
+    subprocess.call(s, shell=True)
+
     print("*******************************")
     print("UPDATING PACKAGES...")
-    subprocess.call(['conda',
-                     'upgrade',
-                     '--all',
-                     '-c',
-                     'conda-forge',
-                     *specific_versions])
+
+    s = 'conda upgrade --all -c conda-forge '
+    for _ in specific_versions:
+        s += _
+        s += ' '
+
+    subprocess.call(s, shell=True)
