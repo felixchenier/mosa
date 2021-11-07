@@ -7,6 +7,7 @@ import urllib.parse as parse
 import subprocess
 import mosa
 import os
+import threading
 
 
 biomec_url = 'https://felixchenier.uqam.ca/biomec/interface'
@@ -96,16 +97,24 @@ class MainWindow(QMainWindow):
     def scan_new_url(self, q):
         q = q.toString()
         query = parse.parse_qs(parse.urlsplit(q).query)
-        print(query)
+
         if 'command' in query:
+
             if query['command'][0] == 'find_file':
+                thread = threading.Thread(
+                    target=find_file,
+                    args=(query['value'][0], )
+                )
+                thread.start()
                 self.browser.back()
-                find_file(query['value'][0])
+
             elif query['command'][0] == 'rename_file':
+                thread = threading.Thread(
+                    target=rename_file,
+                    args=(query['value'][0], )
+                )
+                thread.start()
                 self.browser.back()
-                self.showMinimized()
-                rename_file(query['value'][0])
-                self.showMaximized()
 
 
 #-------------------------
