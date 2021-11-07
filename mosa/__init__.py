@@ -43,6 +43,9 @@ import subprocess
 import platform
 import shutil
 import webbrowser
+import sys
+import limitedinteraction as li
+
 
 try:
     from mosa.dbinterface import DBInterface
@@ -89,6 +92,29 @@ _is_linux = True if platform.system() == 'Linux' else False
 
 # Current folder
 _root_folder = os.path.dirname(os.path.dirname(__file__))
+
+
+def start_menu() -> None:
+    """Run the start menu."""
+
+    print("--- Ne pas fermer cette fenêtre ---")
+
+    choices = [
+        ['Spyder', ['spyder']],
+        ['Banque de données', [sys.executable, _root_folder + '/mosa/browser.py']],
+        ['Quitter', 'quit']
+    ]
+
+    choice = li.button_dialog(
+        'Laboratoire de recherche en mobilité et sport adapté',
+        [choices[_][0] for _ in range(0, len(choices))],
+    )
+    if choice == -1 or choices[choice][1] == 'quit':
+        pass
+    else:
+        subprocess.call(choices[choice][1])
+
+    print("--- Vous pouvez maintenant fermer cette fenêtre ---")
 
 
 def explore(folder_name: str = '') -> None:

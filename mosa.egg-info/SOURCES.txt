@@ -4,6 +4,7 @@ README.md
 setup.py
 mosa/VERSION
 mosa/__init__.py
+mosa/browser.py
 mosa/dbinterface.py
 mosa/dev.py
 mosa/tools.py
