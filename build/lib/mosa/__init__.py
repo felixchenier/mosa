@@ -97,11 +97,20 @@ _root_folder = os.path.dirname(os.path.dirname(__file__))
 def start_menu() -> None:
     """Run the start menu."""
 
-    print("--- Ne pas fermer cette fenêtre ---")
+    print(
+        "---------------------------------------------------------\n"
+        "Ne fermez cette fenêtre que lorsque vous aurez terminé de\n"
+        "travailler avec les outils du laboratoire.\n"
+        "---------------------------------------------------------"
+    )
 
     choices = [
         ['Spyder', ['spyder']],
-        ['Banque de données', [sys.executable, _root_folder + '/mosa/browser.py']],
+        ['Banque de données', [sys.executable,
+                               _root_folder + '/mosa/browser.py']],
+        ['Mise à jour des outils du laboratoire', [sys.executable,
+                         '-c',
+                         'import mosa; mosa.update()']],
         ['Quitter', 'quit']
     ]
 
@@ -187,11 +196,13 @@ def _update_mosa() -> None:
 
 def install() -> None:
     """Install lab's packages."""
-    print("*******************************")
-    print("UPDATING MOSA...")
+    li.message("Installation du package mosa...\n")
     _update_mosa()
-    print("*******************************")
-    print("INSTALLING PACKAGES...")
+
+    li.message(
+        "Téléchargement et installation des \n"
+        "autres packages du laboratoire..."
+    )
     s = 'conda install -y -c conda-forge '
     for _ in specific_versions:
         s += _
@@ -199,18 +210,19 @@ def install() -> None:
     for _ in packages:
         s += _
         s += ' '
-
     subprocess.call(s, shell=True)
+    li.message("")
 
 
 def update() -> None:
     """Update lab's packages."""
-    print("*******************************")
-    print("UPDATING MOSA...")
+    li.message("Mise à jour du package mosa...\n")
     _update_mosa()
-    print("*******************************")
-    print("INSTALLING NEW PACKAGES...")
 
+    li.message(
+        "Téléchargement et installation des \n"
+        "nouveaux packages du laboratoire..."
+    )
     s = 'conda install -y -c conda-forge '
     for _ in specific_versions:
         s += _
@@ -218,15 +230,16 @@ def update() -> None:
     for _ in packages:
         s += _
         s += ' '
-
     subprocess.call(s, shell=True)
 
-    print("*******************************")
-    print("UPDATING PACKAGES...")
-
+    li.message(
+        "Téléchargement et mise à jour des \n"
+        "autres packages du laboratoire..."
+    )
     s = 'conda upgrade --all -y -c conda-forge '
     for _ in specific_versions:
         s += _
         s += ' '
-
     subprocess.call(s, shell=True)
+
+    li.message("")
