@@ -6,4 +6,4 @@ call %HOMEPATH%\miniconda3\Scripts\activate.bat mosa
 pip install git+https://github.com/felixchenier/mosa
 python -c "import mosa; mosa.install()"
 
-python -c "import limitedinteraction as li; li.button_dialog('MOSA has been installed. Launch using mosa.bat', ['Nice'])"
+python -c "import limitedinteraction as li; li.button_dialog('Installation terminée.', ['OK'])"
