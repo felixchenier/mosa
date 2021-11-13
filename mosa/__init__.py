@@ -82,6 +82,7 @@ packages = [
     'twine',
     'inflection',
     'ffmpeg',
+    'openpyxl',  # Read Excel files with pandas
 ]
 
 
