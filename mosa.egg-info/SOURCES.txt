@@ -8,6 +8,8 @@ mosa/browser.py
 mosa/dbhelper.py
 mosa/dbinterface.py
 mosa/dev.py
+mosa/start_menu.bat
+mosa/start_menu.sh
 mosa/tools.py
 mosa.egg-info/PKG-INFO
 mosa.egg-info/SOURCES.txt

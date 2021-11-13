@@ -23,7 +23,7 @@ setuptools.setup(
         license_files=['LICENSE.txt', 'NOTICE.txt'],
     packages=setuptools.find_packages(),
     package_data={
-        'mosa': ['VERSION'],
+        'mosa': ['VERSION', 'start_menu.*'],
     },
     project_urls={
         'Source': 'https://github.com/felixchenier/mosa/',
