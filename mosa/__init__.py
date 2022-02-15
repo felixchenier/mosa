@@ -49,6 +49,7 @@ import limitedinteraction as li
 
 try:
     from mosa.dbinterface import DBInterface
+    import mosa.constants as constants
     from mosa import dev
 except ModuleNotFoundError:
     pass
@@ -78,10 +79,13 @@ packages = [
     'recommonmark',
     'sphinx-autodoc-typehints',
     'autodocsumm',
-    'nbsphinx',
+    'myst-nb',
+    'sphinxcontrib-mermaid',
     'twine',
     'inflection',
     'ffmpeg',
+    'requests',
+    'types-requests',
     'openpyxl',  # Read Excel files with pandas
 ]
 

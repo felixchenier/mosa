@@ -356,8 +356,12 @@ class DBInterface():
             self.tables['Trials'][[
                 'TrialID', 'TrialLabel', 'SessionLabel',
                 'ParticipantLabel']], how='left')
-        self.tables['Files']['dbfid'] = ('dbfid' +
-                                         self.tables['Files']['FileID'].apply(str) + 'n')
+        if self.tables['Files'].shape[0] > 0:
+            self.tables['Files']['dbfid'] = (
+                'dbfid'
+                + self.tables['Files']['FileID'].apply(str) + 'n'
+            )
+
         self.tables['Files']['FileLabel'] = \
             self.tables['Files']['FileTypeLabel']
 
@@ -726,9 +730,6 @@ class DBInterface():
             self.refresh()
 
         return out
-
-    def __dir__(self):
-        return directory(self.__dict__)
 
 
 if __name__ == "__main__":
