@@ -213,48 +213,27 @@ class DBInterface():
 
         out = {}
 
-        projects = df['Project'].unique().tolist()
-        participants = df['Participant'].unique().tolist()
-        sessions = df['Session'].unique().tolist()
-        trials = df['Trial'].unique().tolist()
-        files = df['File'].unique().tolist()
+        out['Project'] = self.project
+
+        out['Participants'] = df['Participant'].unique().tolist()
+        out['Sessions'] = df['Session'].unique().tolist()
+        out['Trials'] = df['Trial'].unique().tolist()
+        out['Files'] = df['File'].unique().tolist()
+        out['IDs'] = df['ID'].unique().tolist()
         filenames = df['FileName'].unique().tolist()
-        ids = df['ID'].unique().tolist()
 
-        if len(projects) == 1:
-            out['Project'] = projects[0]
-        else:
-            out['Projects'] = projects
+        out['FileNames'] = [
+            filename for filename in filenames if filename != ""
+        ]
 
-        if len(participants) == 1:
-            out['Participant'] = participants[0]
-        else:
-            out['Participants'] = participants
-
-        if len(sessions) == 1:
-            out['Session'] = sessions[0]
-        else:
-            out['Sessions'] = sessions
-
-        if len(trials) == 1:
-            out['Trial'] = trials[0]
-        else:
-            out['Trials'] = trials
-
-        if len(files) == 1:
-            out['File'] = files[0]
-        else:
-            out['Files'] = files
-
-        if len(filenames) == 1:
-            out['FileName'] = filenames[0]
-        else:
-            out['FileNames'] = filenames
-
-        if len(ids) == 1:
-            out['ID'] = ids[0]
-        else:
-            out['IDs'] = ids
+        if (
+                participant != ""
+                and session != ""
+                and trial != ""
+                and file != ""
+                and len(out['FileNames']) == 1
+        ):
+            out['FileName'] = out['FileNames'][0]
 
         return out
 
@@ -396,8 +375,8 @@ class DBInterface():
 
         # Check that the entry was added
         filtered = self.get(participant, session, trial, file)
-        if 'ID' in filtered:
-            return filtered['ID']
+        if len(filtered['IDs']) == 1:
+            return filtered['IDs'][0]
         else:
             raise ValueError("Unable to create this ID.")
 
@@ -476,7 +455,7 @@ class DBInterface():
         str
             The file path
         """
-        self.create_file_id(participant, session, trial, file)
+        dbfid = self.create_file_id(participant, session, trial, file)
 
         # Set the filename
         file_record = self.get(participant, session, trial, file)
@@ -494,8 +473,6 @@ class DBInterface():
                     os.mkdir(dir_name)
                 except FileExistsError:
                     pass
-
-            dbfid = file_record['ID']
 
             make_dir(os.path.join(self.root_folder, file))
             make_dir(os.path.join(self.root_folder, file, participant))
@@ -647,10 +624,8 @@ class DBInterface():
             if len(current_file) == 0:
                 return ''
 
-        # Get the ID
+        # Create/get the ID
         dbfid = self.create_file_id(participant, session, trial, file)
-        if dbfid == -1:
-            raise ValueError("No File ID found for these values.")
 
         # Rename the file
         new_filename = self._rename_file(
