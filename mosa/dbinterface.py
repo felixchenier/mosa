@@ -254,11 +254,15 @@ class DBInterface():
             raise ValueError('Invalid user/password combination')
 
         try:
-            df = (pd
-                  .read_json(json_text)
-                  .set_index('ID')
-                  .join(self._files)
-                  .fillna(''))
+
+            df = pd.read_json(json_text)
+            if len(df) == 0:
+                df = pd.DataFrame(columns=[
+                    'Project', 'Participant', 'Session', 'Trial', 'File', 'ID'
+                ])
+            df = df.set_index('ID')
+            df = df.join(self._files)
+            df = df.fillna('')
 
             return df
 

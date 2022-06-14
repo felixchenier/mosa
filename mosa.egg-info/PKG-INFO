@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: mosa
-Version: 0.24
+Version: 0.25
 Summary: Private module for the Mobility and Adaptive Sports Research Lab.
 Home-page: https://github.com/felixchenier/mosa
 Author: Félix Chénier
@@ -8,7 +8,6 @@ Author-email: chenier.felix@uqam.ca
 License: Apache
 Project-URL: Source, https://github.com/felixchenier/mosa/
 Project-URL: Tracker, https://github.com/felixchenier/mosa/issues
-Platform: UNKNOWN
 Classifier: Development Status :: 3 - Alpha
 Classifier: Intended Audience :: Science/Research
 Classifier: License :: OSI Approved :: Apache Software License
@@ -61,5 +60,3 @@ Installation de Python et des packages utilisés par le laboratoire
     - `import mosa`
     - `mosa.update()`
     - Il peut être nécessaire de redémarrer Spyder après une mise à jour.
-
-
