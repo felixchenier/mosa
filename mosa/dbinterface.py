@@ -32,6 +32,7 @@ from io import StringIO
 import pandas as pd
 import warnings
 from typing import Dict, List, Any, Union
+import json
 
 
 class DBInterface():
@@ -39,7 +40,7 @@ class DBInterface():
 
     Parameters
     ----------
-    project_label
+    project
         Project label, for example 'FC_XX16E'.
     user
         Optional. Username on BIOMEC. If none is supplied, a dialog box asks
@@ -57,36 +58,32 @@ class DBInterface():
     @property
     def participants(self) -> List[str]:
         """Return a list of all participant labels in the project."""
-        table = self.tables['Participants']['ParticipantLabel']
-        return table.drop_duplicates().to_list()
+        return self.table['Participant'].unique().tolist()
 
     @property
     def sessions(self) -> List[str]:
         """Return a list of all session labels in the project."""
-        table = self.tables['Sessions']['SessionLabel']
-        return table.drop_duplicates().to_list()
+        return self.table['Session'].unique().tolist()
 
     @property
     def trials(self) -> List[str]:
         """Return a list of all trial labels in the project."""
-        table = self.tables['Trials']['TrialLabel']
-        return table.drop_duplicates().to_list()
+        return self.table['Trial'].unique().tolist()
 
     @property
     def files(self) -> List[str]:
         """Return a list of all file labels in the project."""
-        table = self.tables['Files']['FileLabel']
-        return table.drop_duplicates().to_list()
+        return self.table['File'].unique().tolist()
 
     def __init__(self,
-                 project_label: str,
+                 project: str,
                  user: str = '',
                  password: str = '',
                  root_folder: str = '',
-                 url: str = 'https://felixchenier.uqam.ca/biomec'):
+                 url: str = 'https://felixchenier.uqam.ca/db'):
         """Init."""
         # Simple assignations
-        self.project_label = project_label
+        self.project = project
         self.url = url
 
         # Get username and password if not supplied
@@ -99,7 +96,7 @@ class DBInterface():
         # Assign root folder
         if root_folder == '':
             li.message('Please select the folder that contains the '
-                        'project data.')
+                       'project data.')
             self.root_folder = li.get_folder()
             li.message('')
         else:
@@ -114,10 +111,10 @@ class DBInterface():
         s = f'--------------------------------------------------\n'
         s += 'DBInterface\n'
         s += f'--------------------------------------------------\n'
-        s += f'          url: {self.url}\n'
-        s += f'         user: {self.user}\n'
-        s += f'project_label: {self.project_label}\n'
-        s += f'  root_folder: {self.root_folder}\n'
+        s += f'        url: {self.url}\n'
+        s += f'       user: {self.user}\n'
+        s += f'    project: {self.project}\n'
+        s += f'root_folder: {self.root_folder}\n'
         s += f'--------------------------------------------------\n'
         s += f'participants:\n'
         s += str(self.participants) + '\n'
@@ -133,35 +130,11 @@ class DBInterface():
         s += f'--------------------------------------------------\n'
         return s
 
-    def _fetch_table(self, table_name: str) -> pd.DataFrame:
-        global _module_user, _module_password
-        url = self.url + '/kineticstoolkit/dbinterface.php'
-        result = requests.post(url, data={
-            'username': self.user,
-            'password': self._password,
-            'projectlabel': self.project_label,
-            'action': 'fetchtable',
-            'table': table_name})
-
-        csv_text = result.content.decode("iso8859_15")
-        if '# INVALID USER/PASSWORD COMBINATION' in csv_text:
-            raise ValueError('Invalid user/password combination')
-
-        try:
-            return pd.read_csv(StringIO(csv_text),
-                               comment='#',
-                               delimiter='\t')
-        except pd.errors.EmptyDataError:
-            raise ValueError('No value returned for this project.')
-        except Exception:
-            print(csv_text)
-            raise ValueError('Unknown exception, see above.')
-
-    def _scan_files(self):
+    def _scan_files(self) -> pd.DataFrame:
 
         # Scan all files in root folder
         dict_files = {}
-        dict_files['FileID'] = []
+        dict_files['ID'] = []
         dict_files['FileName'] = []
         self.duplicates = []
 
@@ -172,7 +145,7 @@ class DBInterface():
                     if 'dbfid' in file:
                         try:
                             dbfid = int(file.split('dbfid')[1].split('n')[0])
-                            if dbfid in dict_files['FileID']:
+                            if dbfid in dict_files['ID']:
                                 # Duplicate file
 
                                 if warned_once is False:
@@ -182,14 +155,14 @@ class DBInterface():
                                     warned_once = True
                                     self.duplicates = []
 
-                                dup_index = dict_files['FileID'].index(dbfid)
+                                dup_index = dict_files['ID'].index(dbfid)
                                 dup_file = dict_files['FileName'][dup_index]
 
                                 self.duplicates.append(
                                     (folder + '/' + file, dup_file))
 
                             else:
-                                dict_files['FileID'].append(dbfid)
+                                dict_files['ID'].append(dbfid)
                                 dict_files['FileName'].append(
                                     folder + '/' + file)
                         except ValueError:
@@ -197,16 +170,7 @@ class DBInterface():
                             # a dbfid string in the file name by chance.
 
         # Convert to a Pandas DataFrame
-        return pd.DataFrame(dict_files)
-
-    def _filter_table(self,
-                      table: pd.DataFrame,
-                      filters: Dict[str, str]) -> pd.DataFrame:
-        """Apply filters on a DataFrame, return the filtered DataFrame."""
-        for column in filters:
-            if column in table.columns:
-                table = table[table[column] == filters[column]]
-        return table
+        return pd.DataFrame(dict_files).set_index('ID')
 
     def get(self, participant: str = '', session: str = '',
             trial: str = '', file: str = '') -> Dict[str, Any]:
@@ -236,180 +200,248 @@ class DBInterface():
 
         """
         # Assign the tables
-        if participant == '' and session == '' and trial == '' and file == '':
-            table_name = 'Projects'
-            contents_name = 'Participants'
-            contents_field = 'ProjectLabel'
-            contents_filter = self.project_label
-        elif participant != '' and session == '' and trial == '' and file == '':
-            table_name = 'Participants'
-            contents_name = 'Sessions'
-            contents_field = 'ParticipantLabel'
-            contents_filter = participant
-        elif participant != '' and session != '' and trial == '' and file == '':
-            table_name = 'Sessions'
-            contents_name = 'Trials'
-            contents_field = 'SessionLabel'
-            contents_filter = session
-        elif participant != '' and session != '' and trial != '' and file == '':
-            table_name = 'Trials'
-            contents_name = 'Files'
-            contents_field = 'TrialLabel'
-            contents_filter = trial
-        elif participant != '' and session != '' and trial != '' and file != '':
-            table_name = 'Files'
-            contents_name = ''
-            contents_field = 'FileLabel'
-            contents_filter = file
-        else:
-            raise ValueError('Bad combination of arguments')
+        df = self.table.reset_index()
 
-        table = self.tables[table_name]
-        if contents_name != '':
-            contents = self.tables[contents_name]
-        else:
-            contents = None
-
-        # Filter
-        filters = dict()
         if participant != '':
-            filters['ParticipantLabel'] = participant
+            df = df[df['Participant'] == participant]
         if session != '':
-            filters['SessionLabel'] = session
+            df = df[df['Session'] == session]
         if trial != '':
-            filters['TrialLabel'] = trial
+            df = df[df['Trial'] == trial]
         if file != '':
-            filters['FileLabel'] = file
+            df = df[df['File'] == file]
 
-        table = self._filter_table(table, filters)
-        if contents is not None:
-            contents = self._filter_table(contents, filters)
+        out = {}
 
-        # Change nans to None
-        table = table.where(pd.notnull(table), None)
+        projects = df['Project'].unique().tolist()
+        participants = df['Participant'].unique().tolist()
+        sessions = df['Session'].unique().tolist()
+        trials = df['Trial'].unique().tolist()
+        files = df['File'].unique().tolist()
+        filenames = df['FileName'].unique().tolist()
+        ids = df['ID'].unique().tolist()
 
-        # Convert to dict
-        dict_out = table.to_dict('records')
-
-        if len(dict_out) < 1:
-            raise ValueError(f'No data was found for {filters}.')
-        elif len(dict_out) > 1:
-            raise ValueError('More than one item found.')
+        if len(projects) == 1:
+            out['Project'] = projects[0]
         else:
-            dict_out = dict_out[0]
+            out['Projects'] = projects
 
-        # Add the contents
-        if contents is not None:
-            contents = contents[
-                contents[contents_field] == contents_filter]
-            contents = contents[contents_name[0:-1] + 'Label']
-            dict_out[contents_name] = contents.to_list()
+        if len(participants) == 1:
+            out['Participant'] = participants[0]
+        else:
+            out['Participants'] = participants
 
-        return dict_out
+        if len(sessions) == 1:
+            out['Session'] = sessions[0]
+        else:
+            out['Sessions'] = sessions
 
-    def _refresh_tables(self) -> None:
-        """Fetch tables on BIOMEC and merge them in the class instance."""
+        if len(trials) == 1:
+            out['Trial'] = trials[0]
+        else:
+            out['Trials'] = trials
 
-        def repetition_to_str(repetition: Union[str, int]) -> str:
-            try:
-                repetition = str(int(repetition))
-            except Exception:
-                repetition = ''
-            return repetition
+        if len(files) == 1:
+            out['File'] = files[0]
+        else:
+            out['Files'] = files
 
-        self.tables['Projects'] = self._fetch_table('Projects')
+        if len(filenames) == 1:
+            out['FileName'] = filenames[0]
+        else:
+            out['FileNames'] = filenames
 
-        # Participants
-        self.tables['Participants'] = self._fetch_table('Participants')
-        self.tables['Participants']['ProjectLabel'] = self.project_label
+        if len(ids) == 1:
+            out['ID'] = ids[0]
+        else:
+            out['IDs'] = ids
 
-        # Sessions
-        self.tables['Sessions'] = self._fetch_table('Sessions')
-        self.tables['Sessions'] = self.tables['Sessions'].merge(
-            self.tables['Participants'][
-                ['ParticipantID', 'ParticipantLabel']], how='left')
-        self.tables['Sessions']['SessionLabel'] = (
-            self.tables['Sessions']['PlaceLabel'] +
-            self.tables['Sessions']['SessionRepetition'].apply(repetition_to_str))
+        return out
 
-        # Trials
-        self.tables['Trials'] = self._fetch_table('Trials')
-        self.tables['TrialTypes'] = self._fetch_table('TrialTypes')
-        self.tables['Trials'] = self.tables['Trials'].merge(
-            self.tables['TrialTypes'], how='left')
-        self.tables['Trials'] = self.tables['Trials'].merge(
-            self.tables['Sessions'][[
-                'SessionID', 'SessionLabel', 'ParticipantLabel']], how='left')
-        self.tables['Trials']['TrialLabel'] = (
-            self.tables['Trials']['TrialTypeLabel'] +
-            self.tables['Trials']['TrialRepetition'].apply(repetition_to_str))
+    def _refresh_table(self) -> pd.DataFrame:
+        """Fetch table on database and return a DataFrame."""
+        global _module_user, _module_password
+        url = self.url + '/mosa/dbinterface.php'
+        result = requests.post(url, data={
+            'username': self.user,
+            'password': self._password,
+            'project': self.project,
+            'action': "select_all"
+        })
 
-        # Files
-        self.tables['Files'] = self._fetch_table('Files')
-        self.tables['FileTypes'] = self._fetch_table('FileTypes')
+        json_text = result.content.decode("iso8859_15")
 
-        self.tables['Files'] = self.tables['Files'].merge(
-            self.tables['FileTypes'], how='left')
-        self.tables['Files'] = self.tables['Files'].merge(
-            self.tables['FileAssociations'], how='left')
-        self.tables['Files'] = self.tables['Files'].merge(
-            self.tables['Trials'][[
-                'TrialID', 'TrialLabel', 'SessionLabel',
-                'ParticipantLabel']], how='left')
-        if self.tables['Files'].shape[0] > 0:
-            self.tables['Files']['dbfid'] = (
-                'dbfid'
-                + self.tables['Files']['FileID'].apply(str) + 'n'
-            )
+        if '# INVALID USER/PASSWORD COMBINATION' in json_text:
+            raise ValueError('Invalid user/password combination')
 
-        self.tables['Files']['FileLabel'] = \
-            self.tables['Files']['FileTypeLabel']
+        try:
+            df = (pd
+                  .read_json(json_text)
+                  .set_index('ID')
+                  .join(self._files)
+                  .fillna(''))
+
+            return df
+
+        except Exception:
+            print(json_text)
+            raise ValueError('Unknown exception, see above.')
 
     def refresh(self) -> None:
         """Update from database and reindex files."""
+        self._files = self._scan_files()
+        self.table = self._refresh_table()
 
-        self.tables['FileAssociations'] = self._scan_files()
-        self._refresh_tables()
-
-    def create_file_entry(self, trial_id: int, file_type_label: str) -> None:
+    def get_file_id(
+            self,
+            participant: str,
+            session: str,
+            trial: str,
+            file: str) -> int:
         """
-        Create a file entry in the database.
+        Return the file ID associated to an entry in the database.
 
-        The project's tables are updated after adding the file entry.
+        Returns -1 of no entry was found.
 
         Parameters
         ----------
-        trial_id
-            Trial identifier in the database. Can be obtained using
-            get(participant, session, trial)['TrialID'].
-        file_type_label
-            File type label.
+        participant
+            e.g., 'P03'
+        session
+            e.g., 'SB4320'
+        trial
+            e.g., 'AnatomicPosition1'
+        file
+            e.g., 'C3D'
+
+        Returns
+        -------
+        int
+            The ID of the file entry, or -1 if no entry was found.
 
         """
-        # Find the file type ID
-        file_type_table = self.tables['FileTypes']
-        file_type_table = file_type_table[
-            file_type_table['FileTypeLabel'] == file_type_label]
-        file_type_table = file_type_table['FileTypeID']
-        if file_type_table.shape[0] != 1:
-            raise ValueError('No or multiple IDs found for this file type id.')
+        global _module_user, _module_password
+        url = self.url + '/mosa/dbinterface.php'
+
+        result = requests.post(url, data={
+            'username': self.user,
+            'password': self._password,
+            'project': self.project,
+            'participant': participant,
+            'session': session,
+            'trial': trial,
+            'file': file,
+            'action': 'select_all',
+        })
+        ids = json.loads(result.content.decode("iso8859_15"))
+
+        if len(ids) == 1:
+            return int(ids[0]['ID'])
+        elif len(ids) > 1:
+            raise ValueError(
+                "More than one entry was found for this file. "
+                "This is not normal, please contact the database maintainer."
+            )
+        return -1
+
+    def create_file_id(
+            self,
+            participant: str,
+            session: str,
+            trial: str,
+            file: str) -> int:
+        """
+        Create a file ID in the database.
+
+        Returns the created file ID. If the ID already existed, it is
+        returned.
+
+        Parameters
+        ----------
+        participant
+            e.g., 'P03'
+        session
+            e.g., 'SB4320'
+        trial
+            e.g., 'AnatomicPosition1'
+        file
+            e.g., 'C3D'
+
+        Returns
+        -------
+        int
+            The ID of the created file entry.
+
+        """
+        fileid = self.get_file_id(participant, session, trial, file)
+        if fileid != -1:
+            return fileid
+
+        # Create the file entry
+        global _module_user, _module_password
+        url = self.url + '/mosa/dbinterface.php'
+
+        requests.post(url, data={
+            'username': self.user,
+            'password': self._password,
+            'project': self.project,
+            'participant': participant,
+            'session': session,
+            'trial': trial,
+            'file': file,
+            'action': 'insert',
+        })
+
+        self.refresh()
+
+        # Check that the entry was added
+        filtered = self.get(participant, session, trial, file)
+        if 'ID' in filtered:
+            return filtered['ID']
         else:
-            file_type_id = file_type_table.iloc[0]
+            raise ValueError("Unable to create this ID.")
 
-        print(requests.post(self.url + '/kineticstoolkit/dbinterface.php',
-                            {'username': self.user,
-                             'password': self._password,
-                             'action': 'createfileentry',
-                             'trialid': trial_id,
-                             'filetypeid': file_type_id}).text)
+    def delete_file_id(
+            self,
+            participant: str,
+            session: str,
+            trial: str,
+            file: str) -> None:
+        """
+        Ask the database to delete a file ID.
 
-        self._refresh_tables()
-        return
+        Parameters
+        ----------
+        participant
+            e.g., 'P03'
+        session
+            e.g., 'SB4320'
+        trial
+            e.g., 'AnatomicPosition1'
+        file
+            e.g., 'C3D'
+
+        """
+        global _module_user, _module_password
+        url = self.url + '/mosa/dbinterface.php'
+
+        requests.post(url, data={
+            'username': self.user,
+            'password': self._password,
+            'project': self.project,
+            'participant': participant,
+            'session': session,
+            'trial': trial,
+            'file': file,
+            'action': 'delete',
+        })
+
+        self.refresh()
 
     def save(self, participant: str, session: str, trial: str,
              file: str, variable: Any) -> str:
         """
-        Save a variable to a BIOMEC referenced file.
+        Save a variable to a db-referenced file.
 
         This method saves the specified variable following either of these
         cases:
@@ -444,15 +476,12 @@ class DBInterface():
         str
             The file path
         """
-        # Create the file entry if not already in database
-        if file not in self.get(participant, session, trial)['Files']:
-            trial_id = self.get(participant, session, trial)['TrialID']
-            self.create_file_entry(trial_id, file)
+        self.create_file_id(participant, session, trial, file)
 
         # Set the filename
         file_record = self.get(participant, session, trial, file)
 
-        if 'FileName' in file_record and file_record['FileName'] is not None:
+        if 'FileName' in file_record and file_record['FileName'] != '':
             file_name = file_record['FileName']
             if not file_name.lower().endswith('.ktk.zip'):
                 raise ValueError('This would overwrite a non-ktk file.')
@@ -466,16 +495,19 @@ class DBInterface():
                 except FileExistsError:
                     pass
 
-            dbfid = file_record['dbfid']
+            dbfid = file_record['ID']
 
             make_dir(os.path.join(self.root_folder, file))
             make_dir(os.path.join(self.root_folder, file, participant))
             make_dir(os.path.join(self.root_folder, file, participant,
                                   session))
 
-            file_name = os.path.join(self.root_folder, file, participant,
-                                     session, dbfid + '_{' + trial + '}' +
-                                     '.ktk.zip')
+            file_name = os.path.join(
+                self.root_folder,
+                file,
+                participant,
+                session,
+                'dbfid' + str(dbfid) + 'n_{' + str(trial) + '}' + '.ktk.zip')
 
         # Save
         ktk.save(file_name, variable)
@@ -485,13 +517,18 @@ class DBInterface():
 
         return file_name
 
-    def load(self, participant: str, session: str, trial: str,
-             file: str) -> Any:
+    def load(
+        self,
+        participant: str,
+        session: str,
+        trial: str,
+        file: str,
+    ) -> Any:
         """
-        Load a variable from a BIOMEC referenced file.
+        Load a variable from a db-referenced file.
 
         This method load the ktk.zip file associated to a participant,
-        session, trial and file type.
+        session, trial and file.
 
         Parameters
         ----------
@@ -509,38 +546,120 @@ class DBInterface():
         Any
             The file's content.
         """
-        return ktk.load(self.get(
-            participant, session, trial, file)['FileName'])
+        filename = self.get(
+            participant, session, trial, file)['FileName']
+        if filename == '':
+            raise ValueError("No file is associated to this entry.")
+        else:
+            return ktk.load(filename)
 
-    def rename(self, filename: str, dbfid: int) -> None:
+    def _rename_file(
+        self,
+        current_file: str,
+        dbfid: int,
+        include_trial_name: bool = True,
+        trial: str = '',
+    ) -> str:
+        """Perform the rename operation."""
+        base, ext = os.path.splitext(current_file)
+        if 'dbfid' in base:
+            base_left_part, rest = base.split('dbfid', maxsplit=1)
+        else:
+            base_left_part = base + '_'
+
+        new_filename = (base_left_part + 'dbfid' + str(dbfid) + 'n' + ext)
+
+        if include_trial_name is True:
+            new_filename = (
+                base_left_part
+                + "dbfid"
+                + str(dbfid)
+                + "n_{"
+                + trial
+                + "}"
+                + ext
+            )
+        else:
+            new_filename = (
+                f"{base_left_part}dbfid{dbfid}n{ext}"
+            )
+
+        os.rename(current_file, new_filename)
+
+    def assign_file_id(
+        self,
+        participant: str,
+        session: str,
+        trial: str,
+        file: str,
+        current_file: str = '',
+        include_trial_name: bool = True
+    ) -> str:
         """
-        Rename a file to include or modify a dbfid code in its filename.
+        Rename a file to include or modify its dbfid code in its name.
 
         Parameters
         ----------
-        filename
-            Name of the file to rename
-        dbfid
-            FileID in database
+        participant
+            Participant label. For example, 'P01'
+        session
+            Session label. For example, 'SB4320'
+        trial
+            Trial label. For example, 'StaticR1'
+        file
+            File type label. For example, 'SyncedMarkers'
+        current_file
+            Name of the file to rename. If '', the file name is asked
+            interactively.
+        include_trial_name
+            Optional. True to include the trial name in the new file name.
+
+        Returns
+        -------
+        str
+            The new file name
 
         """
-        base, ext = os.path.splitext(filename)
+        # Ensure that there is not already a file associated to this entry
+        entry = self.get(participant, session, trial, file)
+        if 'FileName' in entry and entry['FileName'] != '':
+            raise ValueError(
+                "This entry is already associated to the file "
+                f"{entry['FileName']}. "
+                "If you really want to associate a new file to this "
+                f"entry, please rename the foreamentioned file beforehand to "
+                "avoid creating duplicates."
+            )
 
-        if 'dbfid' in base:
-            base_left_part, rest = base.split('dbfid')
-            old_file_id, base_right_part = rest.split('n')
-        else:
-            base_left_part = base + '_'
-            base_right_part = ''
+        # Get the current_file if not existing
+        if current_file == '':
+            li.message(
+                "Please select the file for \n"
+                f"{participant}, {session}, {trial}, {file}",
+                icon='find',
+                top=20,
+            )
 
-        new_filename = (base_left_part + 'dbfid' + str(dbfid) + 'n' +
-                        base_right_part + ext)
+            current_file = li.get_filename(initial_folder=self.root_folder)
 
-        os.rename(filename, new_filename)
+            li.message("")
 
-    def tag_files(self,
-                  include_trial_name: bool = True,
-                  dry_run: bool = True) -> None:
+            if len(current_file) == 0:
+                return ''
+
+        # Get the ID
+        dbfid = self.create_file_id(participant, session, trial, file)
+        if dbfid == -1:
+            raise ValueError("No File ID found for these values.")
+
+        # Rename the file
+        new_filename = self._rename_file(
+            current_file, dbfid, include_trial_name, trial
+        )
+        self.refresh()
+        return new_filename
+
+    def tag_files(self, include_trial_name: bool = True) -> None:
         """
         Rename all files to include tags in file names.
 
@@ -559,52 +678,27 @@ class DBInterface():
 
         """
         # Check that the project has no duplicate files.
-        print('Checking that the project is clean, without duplicates...')
         self.refresh()
         if len(self.duplicates) > 0:
             raise ValueError(
                 'Cannot run this method on a project with duplicates.')
 
-        print('Renaming the files...')
-        file_names = self.tables['Files']['FileName'].to_list()
-        trials = self.tables['Files']['TrialLabel'].to_list()
+        for i, row in self.table.iterrows():
+            if row['FileName'] != '':
+                self._rename_file(
+                    row['FileName'],
+                    i,
+                    include_trial_name,
+                    row['Trial']
+                )
 
-        for i_filename, filename in enumerate(file_names):
-
-            if type(filename) != str or filename == '':
-                continue
-
-            # Get original_name, dbfid, string and ext
-            original_name, remain = filename.split('dbfid', maxsplit=1)
-            dbfid, remain = remain.split('n', maxsplit=1)
-            if remain[0:2] == '_{':
-                _, ext = remain.split('}')
-            else:
-                ext = remain
-
-            if include_trial_name is True:
-                new_filename = (original_name + 'dbfid' + dbfid + 'n_{' +
-                                trials[i_filename] + '}' + ext)
-            else:
-                new_filename = (original_name + 'dbfid' + dbfid + 'n' + ext)
-
-            if filename != new_filename:
-                if dry_run is False:
-                    os.rename(filename, new_filename)
-                else:
-                    print('-------------')
-                    print('Will rename:')
-                    print(filename)
-                    print(new_filename)
-
-        print('Refreshing project...')
         self.refresh()
 
-    def batch_fix_file_type(self,
-                            folder: str,
-                            new_file_type_label: str,
-                            create_file_entries: bool = False,
-                            dry_run: bool = True) -> Dict[str, List[Any]]:
+    def reassign_file_id_by_folder(
+            self,
+            file_label,
+            folder: str = ''
+    ) -> Dict[str, List[Any]]:
         """
         Batch-rename files in a folder to their new corresponding dbfid.
 
@@ -656,17 +750,21 @@ class DBInterface():
             - 'NoFileTypeLabel' : list of files which associated trial does not
               contain the specified FileTypeLabel
         """
-        out = dict()  # type: Dict[str, List[Any]]
-        out['Rename'] = []
-        out['Ignore'] = []
-        out['NoFileTypeLabel'] = []
+        self.refresh()
 
         # Run through the specified folder
+        if folder == '':
+            li.message(
+                "Select the folder that contains the files "
+                f"that should be reassigned to be {file_label}"
+            )
+            folder = li.get_folder(self.root_folder)
+            li.message("")
+
         files = os.listdir(folder)
 
         for filename in files:
-            if not 'dbfid' in filename:
-                out['Ignore'].append(filename)
+            if 'dbfid' not in filename:
                 continue
 
             # Extract incorrect FileID
@@ -675,61 +773,20 @@ class DBInterface():
 
             old_file_id = int(s_old_file_id)
 
-            # Find corresponding trial
-            trial_id = self.tables['Files']['TrialID'][
-                self.tables['Files']['FileID'] == old_file_id].iloc[0]
+            # Find corresponding entry
+            entry = self.table.loc[old_file_id]
 
-            # Define correct FileID
-            def find_new_file_id():
-                # Return the file ID that corresponds to the specified
-                # trial id and file type label. This is a function so that
-                # it can easily be called twice.
-                trial_files = self.tables['Files'][
-                    self.tables['Files']['TrialID'] == trial_id]
-                trial_files = trial_files['FileID'][
-                    trial_files['FileTypeLabel'] == new_file_type_label]
-
-                if trial_files.shape[0] == 1:
-                    new_file_id = trial_files.iloc[0]
-                else:
-                    new_file_id = None
-                return new_file_id
-
-            new_file_id = find_new_file_id()
-
-            if new_file_id is None and dry_run is False:
-                # No FileID was found for this FileTypeLabel.
-                if create_file_entries is True:
-                    print(f'Creating file entry for {filename}')
-                    self.create_file_entry(trial_id, new_file_type_label)
-                    new_file_id = find_new_file_id()
-
-            if new_file_id is None:
-                # No FileID was found for this FileTypeLabel, even after
-                # creating the file entry. This shouldn't happen unless
-                # on dry runs.
-                print(f'Found no file entry for {filename}')
-                out['NoFileTypeLabel'].append(filename)
-                continue
-
-            # Set new file name
-            new_file_name = (filename_left_part + 'dbfid' +
-                             str(new_file_id) + 'n' +
-                             filename_right_part)
-
-            out['Rename'].append((filename, new_file_name))
-
-        if dry_run:
-            print('Dry run. No file was renamed.')
-        else:
-            for element in out['Rename']:
-                os.rename(folder + '/' + element[0],
-                          folder + '/' + element[1])
+            # Reassign the file to the correct file type
+            self.assign_file_id(
+                entry['Participant'],
+                entry['Session'],
+                entry['Trial'],
+                file_label,
+                current_file=(folder + '/' + filename),
+            )
             # Refresh the project, so that new-renamed files can be indexed
             # accordingly.
             self.refresh()
-
-        return out
 
 
 if __name__ == "__main__":

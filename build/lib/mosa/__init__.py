@@ -87,6 +87,7 @@ packages = [
     'requests',
     'types-requests',
     'openpyxl',  # Read Excel files with pandas
+    'jupytext',
 ]
 
 
@@ -114,8 +115,8 @@ def start_menu() -> None:
         ['Banque de données', [sys.executable,
                                _root_folder + '/mosa/browser.py']],
         ['Mise à jour des outils du laboratoire', [sys.executable,
-                         '-c',
-                         'import mosa; mosa.update()']],
+                                                   '-c',
+                                                   'import mosa; mosa.update()']],
         ['Quitter', 'quit']
     ]
 
