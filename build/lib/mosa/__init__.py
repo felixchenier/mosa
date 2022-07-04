@@ -57,44 +57,49 @@ except ModuleNotFoundError:
 
 # Packages with a specific version number
 specific_versions = [
-    'python=3.8',
-    'tk=8.6.10',  # 8.6.11 has a title bar bug on macOS
+    "python=3.8",
+    #    "tk=8.6.10",  # 8.6.11 has a title bar bug on macOS
 ]
 
 # Packages to install and keep updated
 packages = [
-    'spyder',
-    'ezc3d',
-    'kineticstoolkit',
-    'sphinx_rtd_theme',
-    'seaborn',
-    'statsmodels',
-    'git',
-    'pytest',
-    'mypy',
-    'coverage',
-    'jupyterlab',
-    'sphinx',
-    'sphinx-material',
-    'recommonmark',
-    'sphinx-autodoc-typehints',
-    'autodocsumm',
-    'myst-nb',
-    'sphinxcontrib-mermaid',
-    'twine',
-    'inflection',
-    'ffmpeg',
-    'requests',
-    'types-requests',
-    'openpyxl',  # Read Excel files with pandas
-    'jupytext',
+    "spyder",
+    "ezc3d",
+    "kineticstoolkit",
+    "seaborn",
+    "statsmodels",
+    "git",
+    "pytest",
+    "mypy",
+    "coverage",
+    "jupyterlab",
+    "sphinx",
+    "jupyter-book",
+    "recommonmark",
+    "sphinx-autodoc-typehints",
+    "autodocsumm",
+    "myst-nb",
+    "twine",
+    "inflection",
+    "ffmpeg",
+    "requests",
+    "types-requests",
+    "openpyxl",  # Read Excel files with pandas
+    "jupytext",
+    "black",
+    "jupyterlab_code_formatter",
+]
+
+# Kinetics Toolkit extensions
+extensions = [
+    "git+https://github.com/felixchenier/kineticstoolkit_pushrimkinetics",
 ]
 
 
 # Operating system
-_is_pc = True if platform.system() == 'Windows' else False
-_is_mac = True if platform.system() == 'Darwin' else False
-_is_linux = True if platform.system() == 'Linux' else False
+_is_pc = True if platform.system() == "Windows" else False
+_is_mac = True if platform.system() == "Darwin" else False
+_is_linux = True if platform.system() == "Linux" else False
 
 # Current folder
 _root_folder = os.path.dirname(os.path.dirname(__file__))
@@ -102,7 +107,6 @@ _root_folder = os.path.dirname(os.path.dirname(__file__))
 
 def start_menu() -> None:
     """Run the start menu."""
-
     print(
         "---------------------------------------------------------\n"
         "Ne fermez cette fenêtre que lorsque vous aurez terminé de\n"
@@ -111,20 +115,23 @@ def start_menu() -> None:
     )
 
     choices = [
-        ['Spyder', ['spyder']],
-        ['Banque de données', [sys.executable,
-                               _root_folder + '/mosa/browser.py']],
-        ['Mise à jour des outils du laboratoire', [sys.executable,
-                                                   '-c',
-                                                   'import mosa; mosa.update()']],
-        ['Quitter', 'quit']
+        ["Spyder", ["spyder"]],
+        [
+            "Banque de données",
+            [sys.executable, _root_folder + "/mosa/browser.py"],
+        ],
+        [
+            "Mise à jour des outils du laboratoire",
+            [sys.executable, "-c", "import mosa; mosa.update()"],
+        ],
+        ["Quitter", "quit"],
     ]
 
     choice = li.button_dialog(
-        'Laboratoire de recherche en mobilité et sport adapté',
+        "Laboratoire de recherche en mobilité et sport adapté",
         [choices[_][0] for _ in range(0, len(choices))],
     )
-    if choice == -1 or choices[choice][1] == 'quit':
+    if choice == -1 or choices[choice][1] == "quit":
         pass
     else:
         subprocess.call(choices[choice][1])
@@ -132,7 +139,7 @@ def start_menu() -> None:
     print("--- Vous pouvez maintenant fermer cette fenêtre ---")
 
 
-def explore(folder_name: str = '') -> None:
+def explore(folder_name: str = "") -> None:
     """
     Open an Explorer window (on Windows) or a Finder window (on macOS).
 
@@ -147,17 +154,18 @@ def explore(folder_name: str = '') -> None:
         folder_name = os.getcwd()
 
     if _is_pc is True:
-        os.system(f'start explorer {folder_name}')
+        os.system(f"start explorer {folder_name}")
 
     elif _is_mac is True:
-        subprocess.call(['open', folder_name])
+        subprocess.call(["open", folder_name])
 
     else:
-        raise NotImplementedError('This function is only implemented on'
-                                  'Windows and macOS.')
+        raise NotImplementedError(
+            "This function is only implemented on" "Windows and macOS."
+        )
 
 
-def terminal(folder_name: str = '') -> None:
+def terminal(folder_name: str = "") -> None:
     """
     Open a terminal window.
 
@@ -175,77 +183,92 @@ def terminal(folder_name: str = '') -> None:
         folder_name = os.getcwd()
 
     if _is_pc is True:
-        os.system(f'cmd /c start /D {folder_name} cmd')
+        os.system(f"cmd /c start /D {folder_name} cmd")
 
     elif _is_mac is True:
-        subprocess.call([
-            'osascript',
-            '-e',
-            """tell application "Terminal" to do script "cd '""" +
-            str(folder_name) + """'" """])
-        subprocess.call([
-            'osascript',
-            '-e',
-            'tell application "Terminal" to activate'])
+        subprocess.call(
+            [
+                "osascript",
+                "-e",
+                """tell application "Terminal" to do script "cd '"""
+                + str(folder_name)
+                + """'" """,
+            ]
+        )
+        subprocess.call(
+            ["osascript", "-e", 'tell application "Terminal" to activate']
+        )
     else:
-        raise NotImplementedError('This function is only implemented on'
-                                  'Windows and macOS.')
+        raise NotImplementedError(
+            "This function is only implemented on" "Windows and macOS."
+        )
 
 
 def _update_mosa() -> None:
     """Update mosa from github using pip."""
     subprocess.call(
-        'pip install --upgrade git+https://github.com/felixchenier/mosa',
-        shell=True
+        "pip install --upgrade git+https://github.com/felixchenier/mosa",
+        shell=True,
     )
 
 
 def install() -> None:
     """Install lab's packages."""
-    li.message("Installation du package mosa...\n")
+    li.message("Installation du package mosa...")
     _update_mosa()
 
     li.message(
         "Téléchargement et installation des \n"
         "autres packages du laboratoire..."
     )
-    s = 'conda install -y -c conda-forge '
+    s = "conda install -y -c conda-forge "
     for _ in specific_versions:
         s += _
-        s += ' '
+        s += " "
     for _ in packages:
         s += _
-        s += ' '
+        s += " "
     subprocess.call(s, shell=True)
+
+    li.message("Téléchargement des extensions de\nKinetics Toolkit...")
+
+    for _ in extensions:
+        subprocess.call(["pip", "install", "--upgrade", _])
+
     li.message("")
 
 
 def update() -> None:
     """Update lab's packages."""
-    li.message("Mise à jour du package mosa...\n")
+    li.message("Mise à jour du package mosa...")
     _update_mosa()
 
     li.message(
         "Téléchargement et installation des \n"
         "nouveaux packages du laboratoire..."
     )
-    s = 'conda install -y -c conda-forge '
+    s = "conda install -y -c conda-forge "
     for _ in specific_versions:
         s += _
-        s += ' '
+        s += " "
     for _ in packages:
         s += _
-        s += ' '
+        s += " "
     subprocess.call(s, shell=True)
 
     li.message(
         "Téléchargement et mise à jour des \n"
         "autres packages du laboratoire..."
     )
-    s = 'conda upgrade --all -y -c conda-forge '
+    s = "conda upgrade --all -y -c conda-forge "
     for _ in specific_versions:
         s += _
-        s += ' '
+        s += " "
     subprocess.call(s, shell=True)
+
+    li.message("Téléchargement des extensions de\nKinetics Toolkit...")
+
+    for _ in extensions:
+        subprocess.call(["pip", "install", "--upgrade", _])
 
     li.message("")
