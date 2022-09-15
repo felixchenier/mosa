@@ -77,6 +77,7 @@ packages = [
     "jupyter-book",
     "recommonmark",
     "sphinx-autodoc-typehints",
+    "sphinx-sitemap",
     "autodocsumm",
     "myst-nb",
     "twine",

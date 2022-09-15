@@ -4,3 +4,4 @@ dev/.coverage
 
 .coverage
 tests/htmlcov
+tests/__pycache__
