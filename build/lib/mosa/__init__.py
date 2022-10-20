@@ -76,7 +76,6 @@ packages = [
     "sphinx",
     "jupyter-book",
     "recommonmark",
-    "sphinx-autodoc-typehints",
     "sphinx-sitemap",
     "autodocsumm",
     "myst-nb",
@@ -94,6 +93,7 @@ packages = [
 # Kinetics Toolkit extensions
 extensions = [
     "git+https://github.com/felixchenier/kineticstoolkit_pushrimkinetics",
+    "git+https://github.com/felixchenier/kineticstoolkit_anthropometrics",
 ]
 
 
