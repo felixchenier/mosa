@@ -213,8 +213,19 @@ def _update_mosa() -> None:
     )
 
 
+def _install_mamba() -> None:
+    """Update mamba using conda."""
+    subprocess.call(
+        "conda install -y -c conda-forge mamba",
+        shell=True,
+    )
+
+
 def install() -> None:
     """Install lab's packages."""
+    li.message("Installation de mamba...")
+    _install_mamba()    
+    
     li.message("Installation du package mosa...")
     _update_mosa()
 
@@ -222,7 +233,7 @@ def install() -> None:
         "Téléchargement et installation des \n"
         "autres packages du laboratoire..."
     )
-    s = "conda install -y -c conda-forge "
+    s = "mamba install -y -c conda-forge "
     for _ in specific_versions:
         s += _
         s += " "
@@ -248,7 +259,7 @@ def update() -> None:
         "Téléchargement et installation des \n"
         "nouveaux packages du laboratoire..."
     )
-    s = "conda install -y -c conda-forge "
+    s = "mamba install -y -c conda-forge "
     for _ in specific_versions:
         s += _
         s += " "
@@ -261,7 +272,7 @@ def update() -> None:
         "Téléchargement et mise à jour des \n"
         "autres packages du laboratoire..."
     )
-    s = "conda upgrade --all -y -c conda-forge "
+    s = "mamba upgrade --all -y -c conda-forge "
     for _ in specific_versions:
         s += _
         s += " "
