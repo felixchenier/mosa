@@ -118,10 +118,6 @@ def start_menu() -> None:
     choices = [
         ["Spyder", ["spyder"]],
         [
-            "Banque de données",
-            [sys.executable, _root_folder + "/mosa/browser.py"],
-        ],
-        [
             "Mise à jour des outils du laboratoire",
             [sys.executable, "-c", "import mosa; mosa.update()"],
         ],
