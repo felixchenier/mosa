@@ -35,7 +35,7 @@ from typing import Dict, List, Any, Union
 import json
 
 
-class DBInterface():
+class DBInterface:
     """Interface for Felix Chenier's BIOMEC database.
 
     Parameters
@@ -43,62 +43,69 @@ class DBInterface():
     project
         Project label, for example 'FC_XX16E'.
     user
-        Optional. Username on BIOMEC. If none is supplied, a dialog box asks
-        the user for his/her credentials.
+        Optional. Database username. If none is supplied, a dialog box asks
+        the user for their credentials.
     password
-        Optional. Password on BIOMEC.
+        Optional. Database password
     root_folder
         Optional. Project's root folder, where all data files are stored. If
         none is given, a dialog box asks the user to point to this folder.
     url
-        Optional. BIOMEC's url.
+        Optional. Database url.
+    debug
+        Optional. True to print out the answers from the database.
 
     """
 
     @property
     def participants(self) -> List[str]:
         """Return a list of all participant labels in the project."""
-        return self.table['Participant'].unique().tolist()
+        return self.table["Participant"].unique().tolist()
 
     @property
     def sessions(self) -> List[str]:
         """Return a list of all session labels in the project."""
-        return self.table['Session'].unique().tolist()
+        return self.table["Session"].unique().tolist()
 
     @property
     def trials(self) -> List[str]:
         """Return a list of all trial labels in the project."""
-        return self.table['Trial'].unique().tolist()
+        return self.table["Trial"].unique().tolist()
 
     @property
     def files(self) -> List[str]:
         """Return a list of all file labels in the project."""
-        return self.table['File'].unique().tolist()
+        return self.table["File"].unique().tolist()
 
-    def __init__(self,
-                 project: str,
-                 user: str = '',
-                 password: str = '',
-                 root_folder: str = '',
-                 url: str = 'https://felixchenier.uqam.ca/db'):
+    def __init__(
+        self,
+        project: str,
+        user: str = "",
+        password: str = "",
+        root_folder: str = "",
+        url: str = "https://mosa.uqam.ca/db/cgi-bin/api.py",
+        debug: bool = False,
+    ):
         """Init."""
         # Simple assignations
         self.project = project
         self.url = url
+        self.debug = debug
 
         # Get username and password if not supplied
-        if user == '':
+        if user == "":
             self.user, self._password = ktk.gui.get_credentials()
         else:
             self.user = user
             self._password = password
 
         # Assign root folder
-        if root_folder == '':
-            li.message('Please select the folder that contains the '
-                       'project data.')
+        if root_folder == "":
+            li.message(
+                "Please select the folder that contains the " "project data."
+            )
             self.root_folder = li.get_folder()
-            li.message('')
+            li.message("")
         else:
             self.root_folder = root_folder
 
@@ -108,72 +115,79 @@ class DBInterface():
 
     def __repr__(self) -> str:
         """Generate the instance's developer representation."""
-        s = f'--------------------------------------------------\n'
-        s += 'DBInterface\n'
-        s += f'--------------------------------------------------\n'
-        s += f'        url: {self.url}\n'
-        s += f'       user: {self.user}\n'
-        s += f'    project: {self.project}\n'
-        s += f'root_folder: {self.root_folder}\n'
-        s += f'--------------------------------------------------\n'
-        s += f'participants:\n'
-        s += str(self.participants) + '\n'
-        s += f'--------------------------------------------------\n'
-        s += f'sessions:\n'
-        s += str(self.sessions) + '\n'
-        s += f'--------------------------------------------------\n'
-        s += f'trials:\n'
-        s += str(self.trials) + '\n'
-        s += f'--------------------------------------------------\n'
-        s += f'files:\n'
-        s += str(self.files) + '\n'
-        s += f'--------------------------------------------------\n'
+        s = f"--------------------------------------------------\n"
+        s += "DBInterface\n"
+        s += f"--------------------------------------------------\n"
+        s += f"        url: {self.url}\n"
+        s += f"       user: {self.user}\n"
+        s += f"    project: {self.project}\n"
+        s += f"root_folder: {self.root_folder}\n"
+        s += f"--------------------------------------------------\n"
+        s += f"participants:\n"
+        s += str(self.participants) + "\n"
+        s += f"--------------------------------------------------\n"
+        s += f"sessions:\n"
+        s += str(self.sessions) + "\n"
+        s += f"--------------------------------------------------\n"
+        s += f"trials:\n"
+        s += str(self.trials) + "\n"
+        s += f"--------------------------------------------------\n"
+        s += f"files:\n"
+        s += str(self.files) + "\n"
+        s += f"--------------------------------------------------\n"
         return s
 
     def _scan_files(self) -> pd.DataFrame:
-
         # Scan all files in root folder
         dict_files = {}
-        dict_files['ID'] = []
-        dict_files['FileName'] = []
+        dict_files["ID"] = []
+        dict_files["FileName"] = []
         self.duplicates = []
 
         warned_once = False
         for folder, _, files in os.walk(self.root_folder):
             if len(files) > 0:
                 for file in files:
-                    if 'dbfid' in file:
+                    if "dbfid" in file:
                         try:
-                            dbfid = int(file.split('dbfid')[1].split('n')[0])
-                            if dbfid in dict_files['ID']:
+                            dbfid = int(file.split("dbfid")[1].split("n")[0])
+                            if dbfid in dict_files["ID"]:
                                 # Duplicate file
 
                                 if warned_once is False:
                                     warnings.warn(
-                                        'Duplicate file(s) found. See duplicates property.')
+                                        "Duplicate file(s) found. See duplicates property."
+                                    )
 
                                     warned_once = True
                                     self.duplicates = []
 
-                                dup_index = dict_files['ID'].index(dbfid)
-                                dup_file = dict_files['FileName'][dup_index]
+                                dup_index = dict_files["ID"].index(dbfid)
+                                dup_file = dict_files["FileName"][dup_index]
 
                                 self.duplicates.append(
-                                    (folder + '/' + file, dup_file))
+                                    (folder + "/" + file, dup_file)
+                                )
 
                             else:
-                                dict_files['ID'].append(dbfid)
-                                dict_files['FileName'].append(
-                                    folder + '/' + file)
+                                dict_files["ID"].append(dbfid)
+                                dict_files["FileName"].append(
+                                    folder + "/" + file
+                                )
                         except ValueError:
                             pass  # Could not extract an int. Maybe there was
                             # a dbfid string in the file name by chance.
 
         # Convert to a Pandas DataFrame
-        return pd.DataFrame(dict_files).set_index('ID')
+        return pd.DataFrame(dict_files).set_index("ID")
 
-    def get(self, participant: str = '', session: str = '',
-            trial: str = '', file: str = '') -> Dict[str, Any]:
+    def get(
+        self,
+        participant: str = "",
+        session: str = "",
+        trial: str = "",
+        file: str = "",
+    ) -> Dict[str, Any]:
         """
         Extract information from a project.
 
@@ -202,73 +216,83 @@ class DBInterface():
         # Assign the tables
         df = self.table.reset_index()
 
-        if participant != '':
-            df = df[df['Participant'] == participant]
-        if session != '':
-            df = df[df['Session'] == session]
-        if trial != '':
-            df = df[df['Trial'] == trial]
-        if file != '':
-            df = df[df['File'] == file]
+        if participant != "":
+            df = df[df["Participant"] == participant]
+        if session != "":
+            df = df[df["Session"] == session]
+        if trial != "":
+            df = df[df["Trial"] == trial]
+        if file != "":
+            df = df[df["File"] == file]
 
         out = {}
 
-        out['Project'] = self.project
+        out["Project"] = self.project
 
-        out['Participants'] = df['Participant'].unique().tolist()
-        out['Sessions'] = df['Session'].unique().tolist()
-        out['Trials'] = df['Trial'].unique().tolist()
-        out['Files'] = df['File'].unique().tolist()
-        out['IDs'] = df['ID'].unique().tolist()
-        filenames = df['FileName'].unique().tolist()
+        out["Participants"] = df["Participant"].unique().tolist()
+        out["Sessions"] = df["Session"].unique().tolist()
+        out["Trials"] = df["Trial"].unique().tolist()
+        out["Files"] = df["File"].unique().tolist()
+        out["IDs"] = df["ID"].unique().tolist()
+        filenames = df["FileName"].unique().tolist()
 
-        out['FileNames'] = [
+        out["FileNames"] = [
             filename for filename in filenames if filename != ""
         ]
 
         if (
-                participant != ""
-                and session != ""
-                and trial != ""
-                and file != ""
-                and len(out['FileNames']) == 1
+            participant != ""
+            and session != ""
+            and trial != ""
+            and file != ""
+            and len(out["FileNames"]) == 1
         ):
-            out['FileName'] = out['FileNames'][0]
+            out["FileName"] = out["FileNames"][0]
 
         return out
 
     def _refresh_table(self) -> pd.DataFrame:
         """Fetch table on database and return a DataFrame."""
         global _module_user, _module_password
-        url = self.url + '/mosa/dbinterface.php'
-        result = requests.post(url, data={
-            'username': self.user,
-            'password': self._password,
-            'project': self.project,
-            'action': "select_all"
-        })
+        result = requests.post(
+            self.url,
+            data={
+                "username": self.user,
+                "password": self._password,
+                "project": self.project,
+                "action": "select_all",
+            },
+        )
 
         json_text = result.content.decode("iso8859_15")
-
-        if '# INVALID USER/PASSWORD COMBINATION' in json_text:
-            raise ValueError('Invalid user/password combination')
+        if self.debug:
+            print(json_text)
+        decoded = json.loads(json_text)
+        if "Result" in decoded and decoded["Result"] == "Error":
+            raise ValueError(json_text)
 
         try:
-
             df = pd.read_json(json_text)
             if len(df) == 0:
-                df = pd.DataFrame(columns=[
-                    'Project', 'Participant', 'Session', 'Trial', 'File', 'ID'
-                ])
-            df = df.set_index('ID')
+                df = pd.DataFrame(
+                    columns=[
+                        "Project",
+                        "Participant",
+                        "Session",
+                        "Trial",
+                        "File",
+                        "ID",
+                    ]
+                )
+            df = df.set_index("ID")
             df = df.join(self._files)
-            df = df.fillna('')
+            df = df.fillna("")
 
             return df
 
         except Exception:
             print(json_text)
-            raise ValueError('Unknown exception, see above.')
+            raise ValueError("Unknown exception, see above.")
 
     def refresh(self) -> None:
         """Update from database and reindex files."""
@@ -276,11 +300,8 @@ class DBInterface():
         self.table = self._refresh_table()
 
     def get_file_id(
-            self,
-            participant: str,
-            session: str,
-            trial: str,
-            file: str) -> int:
+        self, participant: str, session: str, trial: str, file: str
+    ) -> int:
         """
         Return the file ID associated to an entry in the database.
 
@@ -304,22 +325,30 @@ class DBInterface():
 
         """
         global _module_user, _module_password
-        url = self.url + '/mosa/dbinterface.php'
 
-        result = requests.post(url, data={
-            'username': self.user,
-            'password': self._password,
-            'project': self.project,
-            'participant': participant,
-            'session': session,
-            'trial': trial,
-            'file': file,
-            'action': 'select_all',
-        })
-        ids = json.loads(result.content.decode("iso8859_15"))
+        result = requests.post(
+            self.url,
+            data={
+                "username": self.user,
+                "password": self._password,
+                "project": self.project,
+                "participant": participant,
+                "session": session,
+                "trial": trial,
+                "file": file,
+                "action": "select_all",
+            },
+        )
+        json_text = result.content.decode("iso8859_15")
+        if self.debug:
+            print(json_text)
+        decoded = json.loads(json_text)
+        if "Result" in decoded and decoded["Result"] == "Error":
+            raise ValueError(json_text)
+        ids = decoded
 
         if len(ids) == 1:
-            return int(ids[0]['ID'])
+            return int(ids[0]["ID"])
         elif len(ids) > 1:
             raise ValueError(
                 "More than one entry was found for this file. "
@@ -328,11 +357,8 @@ class DBInterface():
         return -1
 
     def create_file_id(
-            self,
-            participant: str,
-            session: str,
-            trial: str,
-            file: str) -> int:
+        self, participant: str, session: str, trial: str, file: str
+    ) -> int:
         """
         Create a file ID in the database.
 
@@ -362,34 +388,39 @@ class DBInterface():
 
         # Create the file entry
         global _module_user, _module_password
-        url = self.url + '/mosa/dbinterface.php'
 
-        requests.post(url, data={
-            'username': self.user,
-            'password': self._password,
-            'project': self.project,
-            'participant': participant,
-            'session': session,
-            'trial': trial,
-            'file': file,
-            'action': 'insert',
-        })
+        result = requests.post(
+            self.url,
+            data={
+                "username": self.user,
+                "password": self._password,
+                "project": self.project,
+                "participant": participant,
+                "session": session,
+                "trial": trial,
+                "file": file,
+                "action": "insert",
+            },
+        )
+        json_text = result.content.decode("iso8859_15")
+        if self.debug:
+            print(json_text)
+        decoded = json.loads(json_text)
+        if "Result" in decoded and decoded["Result"] == "Error":
+            raise ValueError(json_text)
 
         self.refresh()
 
         # Check that the entry was added
         filtered = self.get(participant, session, trial, file)
-        if len(filtered['IDs']) == 1:
-            return filtered['IDs'][0]
+        if len(filtered["IDs"]) == 1:
+            return filtered["IDs"][0]
         else:
             raise ValueError("Unable to create this ID.")
 
     def delete_file_id(
-            self,
-            participant: str,
-            session: str,
-            trial: str,
-            file: str) -> None:
+        self, participant: str, session: str, trial: str, file: str
+    ) -> None:
         """
         Ask the database to delete a file ID.
 
@@ -406,23 +437,37 @@ class DBInterface():
 
         """
         global _module_user, _module_password
-        url = self.url + '/mosa/dbinterface.php'
 
-        requests.post(url, data={
-            'username': self.user,
-            'password': self._password,
-            'project': self.project,
-            'participant': participant,
-            'session': session,
-            'trial': trial,
-            'file': file,
-            'action': 'delete',
-        })
+        result = requests.post(
+            self.url,
+            data={
+                "username": self.user,
+                "password": self._password,
+                "project": self.project,
+                "participant": participant,
+                "session": session,
+                "trial": trial,
+                "file": file,
+                "action": "delete",
+            },
+        )
+        json_text = result.content.decode("iso8859_15")
+        if self.debug:
+            print(json_text)        
+        decoded = json.loads(json_text)
+        if "Result" in decoded and decoded["Result"] == "Error":
+            raise ValueError(json_text)
 
         self.refresh()
 
-    def save(self, participant: str, session: str, trial: str,
-             file: str, variable: Any) -> str:
+    def save(
+        self,
+        participant: str,
+        session: str,
+        trial: str,
+        file: str,
+        variable: Any,
+    ) -> str:
         """
         Save a variable to a db-referenced file.
 
@@ -464,10 +509,10 @@ class DBInterface():
         # Set the filename
         file_record = self.get(participant, session, trial, file)
 
-        if 'FileName' in file_record and file_record['FileName'] != '':
-            file_name = file_record['FileName']
-            if not file_name.lower().endswith('.ktk.zip'):
-                raise ValueError('This would overwrite a non-ktk file.')
+        if "FileName" in file_record and file_record["FileName"] != "":
+            file_name = file_record["FileName"]
+            if not file_name.lower().endswith(".ktk.zip"):
+                raise ValueError("This would overwrite a non-ktk file.")
 
         else:
 
@@ -480,15 +525,17 @@ class DBInterface():
 
             make_dir(os.path.join(self.root_folder, file))
             make_dir(os.path.join(self.root_folder, file, participant))
-            make_dir(os.path.join(self.root_folder, file, participant,
-                                  session))
+            make_dir(
+                os.path.join(self.root_folder, file, participant, session)
+            )
 
             file_name = os.path.join(
                 self.root_folder,
                 file,
                 participant,
                 session,
-                'dbfid' + str(dbfid) + 'n_{' + str(trial) + '}' + '.ktk.zip')
+                "dbfid" + str(dbfid) + "n_{" + str(trial) + "}" + ".ktk.zip",
+            )
 
         # Save
         ktk.save(file_name, variable)
@@ -527,9 +574,8 @@ class DBInterface():
         Any
             The file's content.
         """
-        filename = self.get(
-            participant, session, trial, file)['FileName']
-        if filename == '':
+        filename = self.get(participant, session, trial, file)["FileName"]
+        if filename == "":
             raise ValueError("No file is associated to this entry.")
         else:
             return ktk.load(filename)
@@ -539,16 +585,16 @@ class DBInterface():
         current_file: str,
         dbfid: int,
         include_trial_name: bool = True,
-        trial: str = '',
+        trial: str = "",
     ) -> str:
         """Perform the rename operation."""
         base, ext = os.path.splitext(current_file)
-        if 'dbfid' in base:
-            base_left_part, rest = base.split('dbfid', maxsplit=1)
+        if "dbfid" in base:
+            base_left_part, rest = base.split("dbfid", maxsplit=1)
         else:
-            base_left_part = base + '_'
+            base_left_part = base + "_"
 
-        new_filename = (base_left_part + 'dbfid' + str(dbfid) + 'n' + ext)
+        new_filename = base_left_part + "dbfid" + str(dbfid) + "n" + ext
 
         if include_trial_name is True:
             new_filename = (
@@ -561,9 +607,7 @@ class DBInterface():
                 + ext
             )
         else:
-            new_filename = (
-                f"{base_left_part}dbfid{dbfid}n{ext}"
-            )
+            new_filename = f"{base_left_part}dbfid{dbfid}n{ext}"
 
         os.rename(current_file, new_filename)
 
@@ -573,8 +617,8 @@ class DBInterface():
         session: str,
         trial: str,
         file: str,
-        current_file: str = '',
-        include_trial_name: bool = True
+        current_file: str = "",
+        include_trial_name: bool = True,
     ) -> str:
         """
         Rename a file to include or modify its dbfid code in its name.
@@ -603,7 +647,7 @@ class DBInterface():
         """
         # Ensure that there is not already a file associated to this entry
         entry = self.get(participant, session, trial, file)
-        if 'FileName' in entry and entry['FileName'] != '':
+        if "FileName" in entry and entry["FileName"] != "":
             raise ValueError(
                 "This entry is already associated to the file "
                 f"{entry['FileName']}. "
@@ -613,11 +657,11 @@ class DBInterface():
             )
 
         # Get the current_file if not existing
-        if current_file == '':
+        if current_file == "":
             li.message(
                 "Please select the file for \n"
                 f"{participant}, {session}, {trial}, {file}",
-                icon='find',
+                icon="find",
                 top=20,
             )
 
@@ -626,7 +670,7 @@ class DBInterface():
             li.message("")
 
             if len(current_file) == 0:
-                return ''
+                return ""
 
         # Create/get the ID
         dbfid = self.create_file_id(participant, session, trial, file)
@@ -660,23 +704,19 @@ class DBInterface():
         self.refresh()
         if len(self.duplicates) > 0:
             raise ValueError(
-                'Cannot run this method on a project with duplicates.')
+                "Cannot run this method on a project with duplicates."
+            )
 
         for i, row in self.table.iterrows():
-            if row['FileName'] != '':
+            if row["FileName"] != "":
                 self._rename_file(
-                    row['FileName'],
-                    i,
-                    include_trial_name,
-                    row['Trial']
+                    row["FileName"], i, include_trial_name, row["Trial"]
                 )
 
         self.refresh()
 
     def reassign_file_id_by_folder(
-            self,
-            file_label,
-            folder: str = ''
+        self, file_label, folder: str = ""
     ) -> Dict[str, List[Any]]:
         """
         Batch-rename files in a folder to their new corresponding dbfid.
@@ -732,7 +772,7 @@ class DBInterface():
         self.refresh()
 
         # Run through the specified folder
-        if folder == '':
+        if folder == "":
             li.message(
                 "Select the folder that contains the files "
                 f"that should be reassigned to be {file_label}"
@@ -743,12 +783,12 @@ class DBInterface():
         files = os.listdir(folder)
 
         for filename in files:
-            if 'dbfid' not in filename:
+            if "dbfid" not in filename:
                 continue
 
             # Extract incorrect FileID
-            filename_left_part, rest = filename.split('dbfid', maxsplit=1)
-            s_old_file_id, filename_right_part = rest.split('n', maxsplit=1)
+            filename_left_part, rest = filename.split("dbfid", maxsplit=1)
+            s_old_file_id, filename_right_part = rest.split("n", maxsplit=1)
 
             old_file_id = int(s_old_file_id)
 
@@ -757,11 +797,11 @@ class DBInterface():
 
             # Reassign the file to the correct file type
             self.assign_file_id(
-                entry['Participant'],
-                entry['Session'],
-                entry['Trial'],
+                entry["Participant"],
+                entry["Session"],
+                entry["Trial"],
                 file_label,
-                current_file=(folder + '/' + filename),
+                current_file=(folder + "/" + filename),
             )
             # Refresh the project, so that new-renamed files can be indexed
             # accordingly.
@@ -771,4 +811,5 @@ class DBInterface():
 if __name__ == "__main__":
     import doctest
     import kineticstoolkit as ktk
+
     doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
