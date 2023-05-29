@@ -418,6 +418,58 @@ class DBInterface:
         else:
             raise ValueError("Unable to create this ID.")
 
+    def update_file_id(
+        self, id: int, participant: str, session: str, trial: str, file: str
+    ) -> None:
+        """
+        Update a current file ID in the database.
+        
+        Assign the new information to an existing file id
+
+        Parameters
+        ----------
+        id
+            The file if to update, e.g., 1234
+        participant
+            e.g., 'P03'
+        session
+            e.g., 'SB4320'
+        trial
+            e.g., 'AnatomicPosition1'
+        file
+            e.g., 'C3D'
+
+        """
+        fileid = self.get_file_id(participant, session, trial, file)
+        if fileid != -1:
+            return fileid
+
+        # Create the file entry
+        global _module_user, _module_password
+
+        result = requests.post(
+            self.url,
+            data={
+                "username": self.user,
+                "password": self._password,
+                "project": self.project,
+                "id": str(id),
+                "participant": participant,
+                "session": session,
+                "trial": trial,
+                "file": file,
+                "action": "update",
+            },
+        )
+        json_text = result.content.decode("iso8859_15")
+        if self.debug:
+            print(json_text)
+        decoded = json.loads(json_text)
+        if "Result" in decoded and decoded["Result"] == "Error":
+            raise ValueError(json_text)
+
+        self.refresh()
+
     def delete_file_id(
         self, participant: str, session: str, trial: str, file: str
     ) -> None:

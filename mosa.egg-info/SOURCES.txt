@@ -15,3 +15,4 @@ mosa.egg-info/PKG-INFO
 mosa.egg-info/SOURCES.txt
 mosa.egg-info/dependency_links.txt
 mosa.egg-info/top_level.txt
+tests/test_dbinterface.py
